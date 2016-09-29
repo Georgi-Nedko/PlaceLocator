@@ -39,8 +39,13 @@
             android:layout_alignParentBottom="true" />
 
     </LinearLayout>
-
-
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tekstche"
+        android:textColor="@android:color/white"
+        android:textSize="60dp"
+        android:layout_gravity="center" />
 
 </LinearLayout>
 
