@@ -1,5 +1,6 @@
 package com.example.xcomputers.placelocator;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.location.Location;
@@ -14,13 +15,10 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.xcomputers.placelocator.model.Category;
-import com.example.xcomputers.placelocator.model.MyPlace;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -42,7 +40,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    TextView testTV;
+
     Button but;
     String latitude;
     String longtitude;
@@ -82,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         but.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new RequestTask().execute("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longtitude + "&radius=" + myRadiusString + "&type=gas_station&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
+
             }
         });
 
@@ -113,12 +111,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         addAllCategories(list);
 
         categoriesView.setLayoutManager(new LinearLayoutManager(this));
-        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, list);
+        CategoriesRecyclerViewAdapter adapter = new CategoriesRecyclerViewAdapter(this, list);
         categoriesView.setAdapter(adapter);
-        adapter.setOnItemClickListener(new MyRecyclerViewAdapter.onItemClickListener() {
+        adapter.setOnItemClickListener(new CategoriesRecyclerViewAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Toast.makeText(MainActivity.this, "clicked" + position, Toast.LENGTH_SHORT).show();
+                executeRequest(position);
             }
         });
 
@@ -136,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 distanceTV.setText(progress + "");
                 myRadiusString = new Integer(progress*1000).toString();
+                Log.e("TAG", "RADIUS STRING: " + myRadiusString);
                 myRadiusDouble = (double) (progress * 1000);
                 Log.e("TAG", myRadiusDouble+"");
             }
@@ -150,6 +149,101 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             }
         });
+    }
+
+    private void executeRequest(int position){
+        String type = null;
+        switch (position){
+            case 0:
+                type = "airport";
+                break;
+            case 1:
+                type = "amusement_park";
+                break;
+            case 2:
+                type = "aquarium";
+                break;
+            case 3:
+                type = "art_gallery";
+                break;
+            case 4:
+                type = "atm";
+                break;
+            case 5:
+                type = "bank";
+                break;
+            case 6:
+                type = "bar";
+                break;
+            case 7:
+                type = "bicycle_store";
+                break;
+            case 8:
+                type = "bowling_alley";
+                break;
+            case 9:
+                type = "bus_station";
+                break;
+            case 10:
+                type = "cafe";
+                break;
+            case 11:
+                type = "campground";
+                break;
+            case 12:
+                type = "car_dealer";
+                break;
+            case 13:
+                type = "car_rental";
+                break;
+            case 14:
+                type = "car_repair";
+                break;
+            case 15:
+                type = "casino";
+                break;
+            case 16:
+                type = "courthouse";
+                break;
+            case 17:
+                type = "dentist";
+                break;
+            case 18:
+                type = "doctor";
+                break;
+            case 19:
+                type = "gym";
+                break;
+            case 20:
+                type = "gas_station";
+                break;
+            case 21:
+                type = "library";
+                break;
+            case 22:
+                type = "police";
+                break;
+            case 23:
+                type = "post_office";
+                break;
+            case 24:
+                type = "restaurant";
+                break;
+            case 25:
+                type = "school";
+                break;
+            case 26:
+                type = "stadium";
+                break;
+            case 27:
+                type = "train_station";
+                break;
+            case 28:
+                type = "university";
+                break;
+        }
+        new RequestTask().execute("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longtitude + "&radius=" + myRadiusString + "&type=" + type + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
+
     }
 
     private void addAllCategories(List list){
@@ -240,9 +334,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         @Override
         protected void onPostExecute(String s) {
+            Intent intent = new Intent(MainActivity.this, SearchResultsActivity.class);
+            intent.putExtra("json", s);
+            startActivity(intent);
 
             Log.e("TAG", s);
-            Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+           // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
 
         }
 
