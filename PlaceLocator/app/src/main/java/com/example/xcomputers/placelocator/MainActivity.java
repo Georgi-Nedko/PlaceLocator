@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -15,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -37,11 +39,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    Button but;
+    Button voiceRecognitionButton;
     String latitude;
     String longtitude;
     RecyclerView categoriesView;
@@ -56,15 +59,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private GoogleSignInOptions gso;
     private Location lastLocation;
     private PlaceAutocompleteFragment autocompleteFragment;
-
+    private static final int VOICE_RECOGNITION_REQUEST = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Pacifico.ttf");
        // testTV = (TextView) findViewById(R.id.testTV);
-        but = (Button) findViewById(R.id.button);
-        but.setTypeface(custom_font);
+        voiceRecognitionButton = (Button) findViewById(R.id.button);
+        voiceRecognitionButton.setTypeface(custom_font);
         String name = getIntent().getStringExtra("name");
         //testTV.setText("Welcome " + name);
 
@@ -77,12 +80,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     .build();
         }
 
-        but.setOnClickListener(new View.OnClickListener() {
+        voiceRecognitionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say what you'd like us to find for you");
+                intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,1);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
+                startActivityForResult(intent, VOICE_RECOGNITION_REQUEST);
             }
         });
+
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -90,12 +99,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
          autocompleteFragment = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-
+        ((EditText)autocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_input)).setTextColor(-1);
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-
+                //TODO Intent to more info screen with place information
                 Log.i("TAG", "Place: " + place.getName());
             }
 
@@ -149,6 +158,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == VOICE_RECOGNITION_REQUEST){
+            ArrayList<String> results;
+            results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            String text = results.get(0).replace("'", "");
+            autocompleteFragment.setText(text);
+            autocompleteFragment.getView().findViewById(com.google.android.gms.R.id.place_autocomplete_search_input).performClick();
+        }
+
     }
 
     private void executeRequest(int position){
@@ -291,11 +312,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             return;
         }
         lastLocation = LocationServices.FusedLocationApi.getLastLocation(client);
-        if(lastLocation != null){
+        if(lastLocation != null) {
             latitude = String.valueOf(lastLocation.getLatitude());
             longtitude = String.valueOf(lastLocation.getLongitude());
+            autocompleteFragment.setBoundsBias(toBounds(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), myRadiusDouble));
+
+
         }
-        autocompleteFragment.setBoundsBias(toBounds(new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude()),myRadiusDouble));
+        else{
+            //TODO put a dialog to say the location and/or WIFI is not on and promp the user to turn it on
+        }
     }
 
     @Override
@@ -336,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         protected void onPostExecute(String s) {
             Intent intent = new Intent(MainActivity.this, SearchResultsActivity.class);
             intent.putExtra("json", s);
+            intent.putExtra("lastLocation", lastLocation);
             startActivity(intent);
 
             Log.e("TAG", s);
