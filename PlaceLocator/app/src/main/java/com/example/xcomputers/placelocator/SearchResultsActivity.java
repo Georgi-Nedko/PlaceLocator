@@ -107,9 +107,9 @@ public class SearchResultsActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             //TODO I've passed the request for place details according to the ID of the clicked place and I've put the json responce in the intent. Just put your activity name
             //TODO in the intent and take the json from the intent in your activity
-            // Intent intent = new Intent(NaNedkoActivityto.this, SearchResultsActivity.class);
-            //intent.putExtra("json", s);
-            //startActivity(intent);
+            Intent intent = new Intent(SearchResultsActivity.this, SelectedPlaceActivity.class);
+            intent.putExtra("json",s);
+            startActivity(intent);
 
             Log.e("TAG", s);
             // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
