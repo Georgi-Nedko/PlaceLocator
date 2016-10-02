@@ -95,6 +95,14 @@
 
 
     </HorizontalScrollView>
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/white"
+        android:id="@+id/uriTV"
+        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -194,7 +202,6 @@
         </LinearLayout>
     </LinearLayout>
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -228,6 +235,8 @@
 
 
     </LinearLayout>
+
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -295,12 +304,14 @@
                 android:textColor="@android:color/white"
                 android:gravity="center_vertical"
                 android:id="@+id/phoneNumberTv"
-                android:text="sdaasdasdasdsadsassdadas"/>
+                android:text="0883415111"/>
 
         </LinearLayout>
 
 
     </LinearLayout>
+
+
     <android.support.v7.widget.RecyclerView
         android:orientation="horizontal"
         android:layout_width="match_parent"
