@@ -74,8 +74,8 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
 
        // cashRB.setRating(2);
-        myRB.setRating(2.8f);
-        myRatingBarTV.setText(myRB.getRating() + "");
+       // myRB.setRating(2.8f);
+       // myRatingBarTV.setText(myRB.getRating() + "");
 
         //getting from json and put
 
@@ -105,12 +105,37 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             }
         });
 
-        hsv.postDelayed(new Runnable() {
+//        hsv.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                hsv.smoothScrollTo(500, 0);
+//            }
+//        }, 1000);
+
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                hsv.smoothScrollTo(500, 0);
+                try {
+                    Thread.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                int x = 1;
+                while (true){
+                    if (!hsv.canScrollHorizontally(x)){
+                        x = -x;
+                    }
+                    final int finalX = x;
+                    hsv.scrollBy(finalX, 0);
+
+                    try {
+                        Thread.sleep(25);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        }, 1000);
+        }).start();
     }
 
 
