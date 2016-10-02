@@ -21,7 +21,7 @@ import java.util.List;
 public class CategoriesRecyclerViewAdapter extends RecyclerView.Adapter<CategoriesRecyclerViewAdapter.MyRecyclerViewHolder> {
     private List<Category> categories;
     private Activity activity;
-    onItemClickListener mItemClickListener;
+    private onItemClickListener mItemClickListener;
     Typeface custom_font;
     public CategoriesRecyclerViewAdapter(Activity activity, List<Category> categories){
         this.categories = categories;
