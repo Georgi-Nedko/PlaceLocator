@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
 import com.example.xcomputers.placelocator.model.MyPlace;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
@@ -18,6 +19,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -28,11 +32,15 @@ import java.util.Scanner;
 public class SearchResultsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ArrayList<MyPlace> list;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
         list = new ArrayList();
+
+
         recyclerView = (RecyclerView) findViewById(R.id.search_results_recycler_view);
 
 
@@ -70,16 +78,17 @@ public class SearchResultsActivity extends AppCompatActivity {
         SearchResultsRecyclerViewAdapter adapter = new SearchResultsRecyclerViewAdapter(this, list);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this).color(Color.WHITE).build());
-        adapter.setOnItemClickListener(new SearchResultsRecyclerViewAdapter.onItemClickListener() {
+        adapter.setOnResultClickListener(new SearchResultsRecyclerViewAdapter.onResultClickListener() {
             @Override
-            public void onItemClick(View view, int position) {
+            public void onResultClicked(View view, int position) {
                 String placeID = list.get(position).getID();
+                Log.e("TAG", "onClick Item from list " + placeID);
                 new RequestTask().execute("https://maps.googleapis.com/maps/api/place/details/json?placeid="+ placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
             }
         });
     }
 
-    class RequestTask extends AsyncTask<String, Void, String> {
+    private class RequestTask extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... params) {
@@ -92,8 +101,12 @@ public class SearchResultsActivity extends AppCompatActivity {
                 connection.connect();
                 int status = connection.getResponseCode();
                 Scanner sc = new Scanner(connection.getInputStream());
+                File file = new File("logche.txt");
+                file.createNewFile();
+                FileWriter writer = new FileWriter(file);
                 while(sc.hasNextLine()){
                     response += sc.nextLine();
+                    writer.append(response);
                 }
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -107,11 +120,12 @@ public class SearchResultsActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             //TODO I've passed the request for place details according to the ID of the clicked place and I've put the json responce in the intent. Just put your activity name
             //TODO in the intent and take the json from the intent in your activity
-            // Intent intent = new Intent(NaNedkoActivityto.this, SearchResultsActivity.class);
-            //intent.putExtra("json", s);
-            //startActivity(intent);
+             Intent intent = new Intent(SearchResultsActivity.this, SelectedPlaceActivity.class);
+            intent.putExtra("json", s);
+            startActivity(intent);
 
             Log.e("TAG", s);
+
             // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
 
         }
