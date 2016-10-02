@@ -33,7 +33,6 @@ import com.google.maps.android.SphericalUtil;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -324,8 +323,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 while(sc.hasNextLine()){
                     response += sc.nextLine();
                 }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }

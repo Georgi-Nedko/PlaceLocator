@@ -33,6 +33,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:24.0.+'
     compile 'com.google.maps.android:android-maps-utils:0.3+'
     compile 'com.yqritc:recyclerview-flexibledivider:1.4.0'
+    compile 'com.github.techery:properratingbar:0.0.4'
     testCompile 'junit:junit:4.12'
 
 

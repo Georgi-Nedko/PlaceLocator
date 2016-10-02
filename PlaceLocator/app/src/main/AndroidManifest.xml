@@ -18,11 +18,6 @@
             android:value="AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4" />
 
         <activity android:name=".LoginActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <meta-data
@@ -31,6 +26,14 @@
 
         <activity android:name=".MainActivity" />
         <activity android:name=".SearchResultsActivity"></activity>
+        <activity android:name=".SelectedPlaceActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
     </application>
 
 </manifest>
