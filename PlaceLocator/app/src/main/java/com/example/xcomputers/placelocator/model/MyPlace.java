@@ -11,12 +11,15 @@ public class MyPlace {
     private String placeID;
     private String distanceToPhone;
 
+
     public MyPlace(String name, String address, float rating, String placeID, String distanceToPhone) {
         this.name = name;
         this.address = address;
         this.rating = rating;
         this.placeID = placeID;
         this.distanceToPhone = distanceToPhone;
+
+
     }
 
     public String getName() {

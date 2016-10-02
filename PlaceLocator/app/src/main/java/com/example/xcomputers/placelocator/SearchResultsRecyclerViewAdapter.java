@@ -21,7 +21,7 @@ public class SearchResultsRecyclerViewAdapter extends RecyclerView.Adapter<Searc
 
     private List<MyPlace> places;
     private Activity activity;
-    onItemClickListener resultsItemClickListener;
+    onResultClickListener resultsItemClickListener;
 
     public SearchResultsRecyclerViewAdapter(Activity activity, List<MyPlace> places) {
         this.places = places;
@@ -70,20 +70,20 @@ public class SearchResultsRecyclerViewAdapter extends RecyclerView.Adapter<Searc
             name = (TextView) itemView.findViewById(R.id.place_name);
             address = (TextView) itemView.findViewById(R.id.place_address);
             distanceToPhone = (TextView) itemView.findViewById(R.id.place_distance);
-
+            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            resultsItemClickListener.onItemClick(v, getPosition());
+            resultsItemClickListener.onResultClicked(v, getPosition());
         }
     }
 
-    public interface onItemClickListener {
-        void onItemClick(View view, int position);
+    public interface onResultClickListener {
+        void onResultClicked(View view, int position);
     }
 
-    public void setOnItemClickListener(final onItemClickListener mItemClickListener) {
+    public void setOnResultClickListener(final onResultClickListener mItemClickListener) {
         this.resultsItemClickListener = mItemClickListener;
     }
 }

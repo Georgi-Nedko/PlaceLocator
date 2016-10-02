@@ -52,7 +52,7 @@ public class CategoriesRecyclerViewAdapter extends RecyclerView.Adapter<Categori
 
     @Override
     public int getItemCount() {
-        Log.e("TAG", categories.size()+"");
+
         return categories.size();
 
     }
