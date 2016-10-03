@@ -7,13 +7,17 @@ import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+
 import android.widget.Button;
 import android.widget.Toast;
+
+
 
 import com.example.xcomputers.placelocator.model.MyPlace;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
@@ -22,12 +26,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -158,21 +158,16 @@ public class SearchResultsActivity extends AppCompatActivity {
             String address = params[0];
             String response = "";
             try {
+
                 URL url = new URL(address);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.connect();
                 int status = connection.getResponseCode();
                 Scanner sc = new Scanner(connection.getInputStream());
-                File file = new File("logche.txt");
-                file.createNewFile();
-                FileWriter writer = new FileWriter(file);
-                while(sc.hasNextLine()){
+                while (sc.hasNextLine()) {
                     response += sc.nextLine();
-                    writer.append(response);
                 }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -189,7 +184,7 @@ public class SearchResultsActivity extends AppCompatActivity {
 
             startActivity(intent);
 
-            Log.e("TAG", s);
+            Log.e("TAG JSON", s);
 
             // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
 
