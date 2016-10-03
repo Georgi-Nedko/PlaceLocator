@@ -2,6 +2,7 @@ package com.example.xcomputers.placelocator;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -19,7 +20,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.balysv.materialripple.MaterialRippleLayout;
 import com.example.xcomputers.placelocator.model.Category;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -64,11 +67,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Pacifico.ttf");
-       // testTV = (TextView) findViewById(R.id.testTV);
+
+        selectDistanceTV = (TextView) findViewById(R.id.distance_left_TV);
+        distanceKMTV = (TextView) findViewById(R.id.distance_right_TV);
+        selectDistanceTV.setTypeface(custom_font);
+        distanceKMTV.setTypeface(custom_font);
+
+        distanceSeekBar = (SeekBar) findViewById(R.id.distance_seek_bar);
+        distanceTV = (TextView) findViewById(R.id.distance_middle_TV);
+
+
+
         voiceRecognitionButton = (Button) findViewById(R.id.button);
         voiceRecognitionButton.setTypeface(custom_font);
-        String name = getIntent().getStringExtra("name");
-        //testTV.setText("Welcome " + name);
+
 
         if (client == null) {
             client = new GoogleApiClient.Builder(this)
@@ -104,7 +116,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onPlaceSelected(Place place) {
                 //TODO Intent to more info screen with place information
+                String placeID = place.getId();
+                Intent intent = new Intent(MainActivity.this, SelectedPlaceActivity.class);
+                intent.putExtra("placeID", placeID);
                 Log.i("TAG", "Place: " + place.getName());
+                startActivity(intent);
             }
 
             @Override
@@ -115,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
 
         categoriesView = (RecyclerView) findViewById(R.id.recycler_view);
+
         List<Category> list = new ArrayList<>();
         addAllCategories(list);
 
@@ -124,17 +141,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         adapter.setOnItemClickListener(new CategoriesRecyclerViewAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                executeRequest(position);
+                if(distanceSeekBar.getProgress() != 0){
+                    executeRequest(position);
+                    return;
+                }
+                Toast.makeText(MainActivity.this, "Place select a radius to search in", Toast.LENGTH_SHORT).show();
+                distanceSeekBar.requestFocus();
             }
         });
 
-        selectDistanceTV = (TextView) findViewById(R.id.distance_left_TV);
-        distanceKMTV = (TextView) findViewById(R.id.distance_right_TV);
-        selectDistanceTV.setTypeface(custom_font);
-        distanceKMTV.setTypeface(custom_font);
 
-        distanceSeekBar = (SeekBar) findViewById(R.id.distance_seek_bar);
-        distanceTV = (TextView) findViewById(R.id.distance_middle_TV);
 
         distanceTV.setText("0");
         distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {

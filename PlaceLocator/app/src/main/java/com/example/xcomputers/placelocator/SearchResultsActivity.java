@@ -4,13 +4,16 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.xcomputers.placelocator.model.MyPlace;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
@@ -27,13 +30,17 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Scanner;
 
 public class SearchResultsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ArrayList<MyPlace> list;
-
-
+    private Toolbar toolbar;
+    private TabLayout tabLayout;
+    private SearchResultsRecyclerViewAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,22 +80,78 @@ public class SearchResultsActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        Collections.sort(list, new Comparator<MyPlace>() {
+            @Override
+            public int compare(MyPlace o1, MyPlace o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+
         Log.e("TAG", "list size before setting the adapter" + list.size()+"");
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        SearchResultsRecyclerViewAdapter adapter = new SearchResultsRecyclerViewAdapter(this, list);
+        adapter = new SearchResultsRecyclerViewAdapter(SearchResultsActivity.this, list);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this).color(Color.WHITE).build());
-        adapter.setOnResultClickListener(new SearchResultsRecyclerViewAdapter.onResultClickListener() {
+        adapter.setOnResultClickListener(createClickListener());
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+
+        tabLayout.addTab(tabLayout.newTab().setText("Name"));
+        tabLayout.addTab(tabLayout.newTab().setText("Distance"));
+        tabLayout.addTab(tabLayout.newTab().setText("Rating"));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(final TabLayout.Tab tab) {
+                Collections.sort(list, new Comparator<MyPlace>() {
+                    @Override
+                    public int compare(MyPlace o1, MyPlace o2) {
+                        switch(tab.getPosition()){
+                            case 0:
+                                return o1.getName().compareTo(o2.getName());
+                            case 1:
+                                double result = ((Double.parseDouble(o1.getDistanceToPhone())*1000) - (Double.parseDouble(o2.getDistanceToPhone())*1000));
+                                Log.e("TAG", "COMPARATOR RESULT DISTANCE: " +result);
+                                return (int) result;
+
+                            case 3:
+                            default:
+                                return (int) (o2.getRating() - o1.getRating());
+
+                        }
+                    }
+
+                });
+                adapter = new SearchResultsRecyclerViewAdapter(SearchResultsActivity.this, list);
+                adapter.setOnResultClickListener(createClickListener());
+                recyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+    }
+    private SearchResultsRecyclerViewAdapter.onResultClickListener createClickListener(){
+        return new SearchResultsRecyclerViewAdapter.onResultClickListener() {
             @Override
             public void onResultClicked(View view, int position) {
                 String placeID = list.get(position).getID();
                 Log.e("TAG", "onClick Item from list " + placeID);
                 new RequestTask().execute("https://maps.googleapis.com/maps/api/place/details/json?placeid="+ placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
             }
-        });
+        };
     }
-
-    private class RequestTask extends AsyncTask<String, Void, String> {
+    class RequestTask extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... params) {

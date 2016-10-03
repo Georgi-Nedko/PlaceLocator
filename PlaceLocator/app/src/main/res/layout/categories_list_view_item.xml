@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<com.balysv.materialripple.MaterialRippleLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ripple"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:mrl_rippleColor="#FFFFFF"
+    app:mrl_rippleAlpha="0.1"
+    >
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -21,3 +31,4 @@
 
 
 </LinearLayout>
+</com.balysv.materialripple.MaterialRippleLayout>
