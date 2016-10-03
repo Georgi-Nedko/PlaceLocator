@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private String myRadiusString;
     private double myRadiusDouble;
-    private GoogleApiClient client;
+    public static GoogleApiClient client;
     private GoogleSignInOptions gso;
     private Location lastLocation;
     private PlaceAutocompleteFragment autocompleteFragment;
