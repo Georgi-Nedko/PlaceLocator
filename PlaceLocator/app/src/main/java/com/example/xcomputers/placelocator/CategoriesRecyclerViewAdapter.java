@@ -28,7 +28,7 @@ public class CategoriesRecyclerViewAdapter extends RecyclerView.Adapter<Categori
     public CategoriesRecyclerViewAdapter(Activity activity, List<Category> categories){
         this.categories = categories;
         this.activity = activity;
-        custom_font = Typeface.createFromAsset(activity.getAssets(), "fonts/Pacifico.ttf");
+        custom_font = Typeface.createFromAsset(activity.getAssets(), "fonts/CenturyGothic.ttf");
     }
 
     @Override

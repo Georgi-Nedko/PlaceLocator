@@ -1,5 +1,6 @@
 package com.example.xcomputers.placelocator;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
@@ -41,6 +42,8 @@ public class SearchResultsActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private SearchResultsRecyclerViewAdapter adapter;
+    private ProgressDialog mProgressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,6 +144,23 @@ public class SearchResultsActivity extends AppCompatActivity {
         });
 
     }
+
+    private void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage("Loading...");
+            mProgressDialog.setIndeterminate(true);
+        }
+
+        mProgressDialog.show();
+    }
+
+    private void hideProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.hide();
+        }
+    }
+
     private SearchResultsRecyclerViewAdapter.onResultClickListener createClickListener(){
         return new SearchResultsRecyclerViewAdapter.onResultClickListener() {
             @Override
@@ -175,6 +195,11 @@ public class SearchResultsActivity extends AppCompatActivity {
         }
 
         @Override
+        protected void onPreExecute() {
+            showProgressDialog();
+        }
+
+        @Override
         protected void onPostExecute(String s) {
             //TODO I've passed the request for place details according to the ID of the clicked place and I've put the json responce in the intent. Just put your activity name
             //TODO in the intent and take the json from the intent in your activity
@@ -183,7 +208,7 @@ public class SearchResultsActivity extends AppCompatActivity {
             intent.putExtra("json", s);
 
             startActivity(intent);
-
+            hideProgressDialog();
             Log.e("TAG JSON", s);
 
             // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();

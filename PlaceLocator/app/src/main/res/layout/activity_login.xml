@@ -16,8 +16,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/welcomeTV"
         android:textColor="@android:color/white"
-        android:text="Place Locator"
-        android:textSize="60dp"
+        android:text="@string/login_app_title"
+        android:textSize="40sp"
         android:layout_gravity="center" />
 </LinearLayout>
 

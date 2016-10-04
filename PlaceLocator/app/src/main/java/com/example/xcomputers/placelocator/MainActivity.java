@@ -1,5 +1,6 @@
 package com.example.xcomputers.placelocator;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -22,7 +23,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.balysv.materialripple.MaterialRippleLayout;
 import com.example.xcomputers.placelocator.model.Category;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -35,6 +35,7 @@ import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
+import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -46,14 +47,15 @@ import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    Button voiceRecognitionButton;
-    String latitude;
-    String longtitude;
-    RecyclerView categoriesView;
-    TextView distanceTV;
-    TextView selectDistanceTV;
-    TextView distanceKMTV;
-    SeekBar distanceSeekBar;
+    private Button voiceRecognitionButton;
+    private String latitude;
+    private String longtitude;
+    private RecyclerView categoriesView;
+    private TextView distanceTV;
+    private TextView selectDistanceTV;
+    private TextView distanceKMTV;
+    private SeekBar distanceSeekBar;
+    private ProgressDialog mProgressDialog;
 
     private String myRadiusString;
     private double myRadiusDouble;
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Pacifico.ttf");
+        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/CenturyGothic.ttf");
 
         selectDistanceTV = (TextView) findViewById(R.id.distance_left_TV);
         distanceKMTV = (TextView) findViewById(R.id.distance_right_TV);
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             public void onClick(View view) {
                 Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say what you'd like us to find for you");
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voice_recognition_dialog_text));
                 intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,1);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
                 startActivityForResult(intent, VOICE_RECOGNITION_REQUEST);
@@ -131,8 +133,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
 
         categoriesView = (RecyclerView) findViewById(R.id.recycler_view);
-
-        List<Category> list = new ArrayList<>();
+        categoriesView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this).color(Color.WHITE).build());
+        final List<Category> list = new ArrayList<>();
         addAllCategories(list);
 
         categoriesView.setLayoutManager(new LinearLayoutManager(this));
@@ -141,23 +143,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         adapter.setOnItemClickListener(new CategoriesRecyclerViewAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(distanceSeekBar.getProgress() != 0){
-                    executeRequest(position);
-                    return;
-                }
-                Toast.makeText(MainActivity.this, "Place select a radius to search in", Toast.LENGTH_SHORT).show();
-                distanceSeekBar.requestFocus();
+                executeRequest(position, list);
             }
         });
 
 
 
-        distanceTV.setText("0");
+        distanceTV.setText("1");
         distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(progress == 0){
+                    progress = 1;
+                }
                 distanceTV.setText(progress + "");
-                myRadiusString = new Integer(progress*1000).toString();
+                myRadiusString = Integer.toString(progress * 1000);
                 Log.e("TAG", "RADIUS STRING: " + myRadiusString);
                 myRadiusDouble = (double) (progress * 1000);
                 Log.e("TAG", myRadiusDouble+"");
@@ -187,132 +187,60 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-    private void executeRequest(int position){
-        String type = null;
-        switch (position){
-            case 0:
-                type = "airport";
-                break;
-            case 1:
-                type = "amusement_park";
-                break;
-            case 2:
-                type = "aquarium";
-                break;
-            case 3:
-                type = "art_gallery";
-                break;
-            case 4:
-                type = "atm";
-                break;
-            case 5:
-                type = "bank";
-                break;
-            case 6:
-                type = "bar";
-                break;
-            case 7:
-                type = "bicycle_store";
-                break;
-            case 8:
-                type = "bowling_alley";
-                break;
-            case 9:
-                type = "bus_station";
-                break;
-            case 10:
-                type = "cafe";
-                break;
-            case 11:
-                type = "campground";
-                break;
-            case 12:
-                type = "car_dealer";
-                break;
-            case 13:
-                type = "car_rental";
-                break;
-            case 14:
-                type = "car_repair";
-                break;
-            case 15:
-                type = "casino";
-                break;
-            case 16:
-                type = "courthouse";
-                break;
-            case 17:
-                type = "dentist";
-                break;
-            case 18:
-                type = "doctor";
-                break;
-            case 19:
-                type = "gym";
-                break;
-            case 20:
-                type = "gas_station";
-                break;
-            case 21:
-                type = "library";
-                break;
-            case 22:
-                type = "police";
-                break;
-            case 23:
-                type = "post_office";
-                break;
-            case 24:
-                type = "restaurant";
-                break;
-            case 25:
-                type = "school";
-                break;
-            case 26:
-                type = "stadium";
-                break;
-            case 27:
-                type = "train_station";
-                break;
-            case 28:
-                type = "university";
-                break;
+    private void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage("Loading...");
+            mProgressDialog.setIndeterminate(true);
         }
+
+        mProgressDialog.show();
+    }
+
+    private void hideProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.hide();
+        }
+    }
+
+    private void executeRequest(int position, List<Category> list){
+        String type = list.get(position).getType();
         new RequestTask().execute("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longtitude + "&radius=" + myRadiusString + "&type=" + type + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
 
     }
 
-    private void addAllCategories(List list){
 
-        list.add(new Category("Airport", R.drawable.airport));
-        list.add(new Category("Amusement park", R.drawable.amusement));
-        list.add(new Category("Aquarium", R.drawable.aquarium));
-        list.add(new Category("Art gallery", R.drawable.art_gallery));
-        list.add(new Category("ATM", R.drawable.atm));
-        list.add(new Category("Bank", R.drawable.bank_dollar));
-        list.add(new Category("Bar", R.drawable.bar));
-        list.add(new Category("Bicycle store", R.drawable.bicycle));
-        list.add(new Category("Bowling", R.drawable.bowling));
-        list.add(new Category("Bus station", R.drawable.bus));
-        list.add(new Category("Cafe", R.drawable.cafe));
-        list.add(new Category("Camping", R.drawable.camping));
-        list.add(new Category("Car dealer", R.drawable.car_dealer));
-        list.add(new Category("Car rental", R.drawable.car_rental));
-        list.add(new Category("Car repair", R.drawable.car_repair));
-        list.add(new Category("Casino", R.drawable.casino));
-        list.add(new Category("Courthouse", R.drawable.courthouse));
-        list.add(new Category("Dentist", R.drawable.dentist));
-        list.add(new Category("Doctor", R.drawable.doctor));
-        list.add(new Category("Fitness", R.drawable.fitness));
-        list.add(new Category("Gas station", R.drawable.gas_station));
-        list.add(new Category("Library", R.drawable.library));
-        list.add(new Category("Police", R.drawable.police));
-        list.add(new Category("Post office", R.drawable.post_office));
-        list.add(new Category("Restaurant", R.drawable.restaurant));
-        list.add(new Category("School", R.drawable.school));
-        list.add(new Category("Stadium", R.drawable.stadium));
-        list.add(new Category("Train station", R.drawable.train));
-        list.add(new Category("University", R.drawable.university));
+    private void addAllCategories(List<Category> list){
+
+        list.add(new Category(getString(R.string.category_airport), R.drawable.airport, getString(R.string.request_type_airport)));
+        list.add(new Category(getString(R.string.category_amusment_park), R.drawable.amusement, getString(R.string.request_type_amusement_park)));
+        list.add(new Category(getString(R.string.category_aquarium), R.drawable.aquarium, getString(R.string.request_type_aquarium)));
+        list.add(new Category(getString(R.string.category_art_gallery), R.drawable.art_gallery, getString(R.string.request_type_art_gallery)));
+        list.add(new Category(getString(R.string.category_ATM), R.drawable.atm, getString(R.string.request_type_atm)));
+        list.add(new Category(getString(R.string.category_bank), R.drawable.bank_dollar, getString(R.string.request_type_bank)));
+        list.add(new Category(getString(R.string.category_bar), R.drawable.bar, getString(R.string.request_type_bar)));
+        list.add(new Category(getString(R.string.category_bicycle_store), R.drawable.bicycle, getString(R.string.request_type_bicycle_store)));
+        list.add(new Category(getString(R.string.category_bowling), R.drawable.bowling, getString(R.string.request_type_bowling)));
+        list.add(new Category(getString(R.string.category_bus_station), R.drawable.bus, getString(R.string.request_type_bus_station)));
+        list.add(new Category(getString(R.string.category_cafe), R.drawable.cafe, getString(R.string.request_type_cafe)));
+        list.add(new Category(getString(R.string.category_camping), R.drawable.camping, getString(R.string.request_type_campgound)));
+        list.add(new Category(getString(R.string.category_car_dealer), R.drawable.car_dealer, getString(R.string.request_type_car_dealer)));
+        list.add(new Category(getString(R.string.category_car_rental), R.drawable.car_rental, getString(R.string.request_type_car_rental)));
+        list.add(new Category(getString(R.string.category_type_car_repair), R.drawable.car_repair,getString(R.string.request_type_car_repair)));
+        list.add(new Category(getString(R.string.category_casino), R.drawable.casino, getString(R.string.request_type_casino)));
+        list.add(new Category(getString(R.string.category_courthouse), R.drawable.courthouse, getString(R.string.request_type_court_house)));
+        list.add(new Category(getString(R.string.category_dentist), R.drawable.dentist,getString(R.string.request_type_dentist)));
+        list.add(new Category(getString(R.string.category_doctor), R.drawable.doctor, getString(R.string.request_type_doctor)));
+        list.add(new Category(getString(R.string.category_type_fitness), R.drawable.fitness, getString(R.string.request_type_gym)));
+        list.add(new Category(getString(R.string.category_gas_station), R.drawable.gas_station, getString(R.string.request_type_gas_station)));
+        list.add(new Category(getString(R.string.category_library), R.drawable.library, getString(R.string.request_type_library)));
+        list.add(new Category(getString(R.string.category_police), R.drawable.police, getString(R.string.request_type_police)));
+        list.add(new Category(getString(R.string.category_post_office), R.drawable.post_office, getString(R.string.request_type_post_office)));
+        list.add(new Category(getString(R.string.category_restaurant), R.drawable.restaurant, getString(R.string.request_type_restaurant)));
+        list.add(new Category(getString(R.string.category_school), R.drawable.school, getString(R.string.request_type_school)));
+        list.add(new Category(getString(R.string.category_stadium), R.drawable.stadium, getString(R.string.request_type_staduim)));
+        list.add(new Category(getString(R.string.category_train_station), R.drawable.train, getString(R.string.request_type_train_station)));
+        list.add(new Category(getString(R.string.category_university), R.drawable.university, getString(R.string.request_type_university)));
     }
     public LatLngBounds toBounds(LatLng center, double radius) {
         LatLng southwest = SphericalUtil.computeOffset(center, radius * Math.sqrt(2.0), 225);
@@ -372,12 +300,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
         @Override
+        protected void onPreExecute() {
+            showProgressDialog();
+        }
+
+        @Override
         protected void onPostExecute(String s) {
             Intent intent = new Intent(MainActivity.this, SearchResultsActivity.class);
             intent.putExtra("json", s);
             intent.putExtra("lastLocation", lastLocation);
             startActivity(intent);
-
+            hideProgressDialog();
             Log.e("TAG", s);
            // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
 

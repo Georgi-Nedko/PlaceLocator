@@ -7,10 +7,12 @@ package com.example.xcomputers.placelocator.model;
 public class Category {
     private String name;
     private int image;
-
-    public Category(String name, int image) {
+    private String type;
+    public Category(String name, int image, String type) {
         this.name = name;
         this.image = image;
+        this.type = type;
+
     }
 
     public String getName() {
@@ -19,5 +21,9 @@ public class Category {
 
     public int getImage() {
         return image;
+    }
+
+    public String getType() {
+        return type;
     }
 }

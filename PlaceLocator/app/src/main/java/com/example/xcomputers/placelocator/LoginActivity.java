@@ -39,7 +39,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         setContentView(R.layout.activity_login);
 
         welcomeTV = (TextView) findViewById(R.id.welcomeTV);
-        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Pacifico.ttf");
+        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/CenturyGothic.ttf");
         welcomeTV.setTypeface(custom_font);
 
 
@@ -89,6 +89,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             handleSignInResult(result);
             Log.e("tag",result.getStatus().getStatusCode() + "");
             changeScreen();
+            finish();
         }
 
     }
@@ -101,7 +102,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             GoogleSignInAccount acct = result.getSignInAccount();
             accName = acct.getDisplayName();
             Log.e("TAG", accName);
-
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            hideProgressDialog();
         } else {
 
         }
@@ -111,7 +115,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     public void onStart() {
         mGoogleApiClient.connect();
-
+        showProgressDialog();
 
         OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
         if (opr.isDone()) {
@@ -128,7 +132,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
                 public void onResult(GoogleSignInResult googleSignInResult) {
-                    hideProgressDialog();
                     handleSignInResult(googleSignInResult);
                 }
             });
@@ -181,7 +184,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         intent.putExtra("name", accName);
         startActivity(intent);
-
+        hideProgressDialog();
     }
 
     @Override
