@@ -4,20 +4,14 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
-import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-
-import android.widget.Button;
-import android.widget.Toast;
-
-
 
 import com.example.xcomputers.placelocator.model.MyPlace;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
@@ -30,7 +24,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Scanner;
@@ -41,6 +34,11 @@ public class SearchResultsActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private SearchResultsRecyclerViewAdapter adapter;
+    private Location phoneLocation;
+    private Location placeLocation;
+    private  String distanceInKMString;
+    private double result;
+    private float distanceInKM;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,14 +55,14 @@ public class SearchResultsActivity extends AppCompatActivity {
             Log.e("TAG", "JSON ARRAY SIZE: " + array.length());
             for(int i = 0; i < array.length(); i++){
                 JSONObject myobj = array.getJSONObject(i);
-                Location phoneLocation = getIntent().getParcelableExtra("lastLocation");
-                Location placeLocation = new Location("");
+                phoneLocation = getIntent().getParcelableExtra("lastLocation");
+                placeLocation = new Location("");
                 double placeLatitude = (double) myobj.getJSONObject("geometry").getJSONObject("location").get("lat");
                 double placeLongtitude = (double) myobj.getJSONObject("geometry").getJSONObject("location").get("lng");
                 placeLocation.setLatitude(placeLatitude);
                 placeLocation.setLongitude(placeLongtitude);
-                float distanceInKM = (phoneLocation.distanceTo(placeLocation))/1000;
-                String distanceInKMString = String.format("%.2f", distanceInKM);
+                distanceInKM = (phoneLocation.distanceTo(placeLocation))/1000;
+                distanceInKMString = String.format("%.2f", distanceInKM);
                 if(!myobj.has("rating")){
                     list.add(new MyPlace((String) myobj.get("name"), (String) myobj.get("vicinity"), 0, (String) myobj.get("place_id"), distanceInKMString));
                 }
@@ -112,7 +110,7 @@ public class SearchResultsActivity extends AppCompatActivity {
                             case 0:
                                 return o1.getName().compareTo(o2.getName());
                             case 1:
-                                double result = ((Double.parseDouble(o1.getDistanceToPhone())*1000) - (Double.parseDouble(o2.getDistanceToPhone())*1000));
+                                result = ((Double.parseDouble(o1.getDistanceToPhone())*1000) - (Double.parseDouble(o2.getDistanceToPhone())*1000));
                                 Log.e("TAG", "COMPARATOR RESULT DISTANCE: " +result);
                                 return (int) result;
 
@@ -181,7 +179,9 @@ public class SearchResultsActivity extends AppCompatActivity {
 
             Intent intent = new Intent(SearchResultsActivity.this, SelectedPlaceActivity.class);
             intent.putExtra("json", s);
-
+           // intent.putExtra("lastLocation", phoneLocation);
+          //  intent.putExtra("placeLocation", placeLocation);
+           // intent.putExtra("distance",distanceInKM);
             startActivity(intent);
 
             Log.e("TAG JSON", s);
