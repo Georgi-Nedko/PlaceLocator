@@ -67,7 +67,7 @@
     <TextView
         android:layout_width="0dp"
         android:layout_weight="0.15"
-        android:text="KM"
+        android:text="@string/distance_KM_text"
         android:layout_height="wrap_content"
         android:id="@+id/place_KMTV"
         android:gravity="right|center" />

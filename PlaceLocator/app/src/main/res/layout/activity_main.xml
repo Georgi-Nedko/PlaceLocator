@@ -20,8 +20,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/button"
             android:layout_marginTop="15dp"
-            android:text="Talk to me"
-            android:textSize="20dp"
+            android:text="@string/voice_recognition_button_text"
+            android:textSize="20sp"
             android:textColor="@android:color/white"/>
     <SeekBar
         android:layout_width="match_parent"
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:layout_marginLeft="15dp"
-            android:text="Select search distance"
+            android:text="@string/distance_slider_text"
             android:id="@+id/distance_left_TV"/>
         <TextView
             android:layout_width="0dp"
