@@ -209,13 +209,13 @@ public class SearchResultsActivity extends AppCompatActivity {
             try {
                 JSONObject json = new JSONObject(s);
                 JSONObject resultsJSON = json.getJSONObject("result");
-                Log.e("RESULTS" , resultsJSON.toString());
+              // Log.e("RESULTS" , resultsJSON.toString());
                 JSONObject geometryJSON = resultsJSON.getJSONObject("geometry");
-                Log.e("GEOMETRY" , geometryJSON.toString());
+                //Log.e("GEOMETRY" , geometryJSON.toString());
                 double placeLatitude = (double) geometryJSON.getJSONObject("location").get("lat");
-                Log.e("placeLatitude" , placeLatitude + "");
+               // Log.e("placeLatitude" , placeLatitude + "");
                 double placeLongtitude = (double) geometryJSON.getJSONObject("location").get("lng");
-                Log.e("placeLongtitude" , placeLongtitude + "");
+               // Log.e("placeLongtitude" , placeLongtitude + "");
                 placeLocation = new Location("");
                 placeLocation.setLatitude(placeLatitude);
                 placeLocation.setLongitude(placeLongtitude);
