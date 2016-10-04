@@ -83,16 +83,16 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         String placeSelectedID = getIntent().getStringExtra("json");
         Log.e("JSON", placeSelectedID);
         lastLocation = getIntent().getParcelableExtra("lastLocation");
-        Log.e("LAST LOCATION", String.valueOf(lastLocation.getLatitude()));
+        Log.e("LAST LOCATION", String.valueOf(lastLocation.getLatitude())+ "," +String.valueOf(lastLocation.getLongitude()));
         placeLocation = getIntent().getParcelableExtra("placeLocation");
-        Log.e("PlACE LOCATION", String.valueOf(placeLocation.getLatitude()));
+        Log.e("PlACE LOCATION", String.valueOf(placeLocation.getLatitude()+ ","+String.valueOf(placeLocation.getLongitude())));
        // kilometers = (lastLocation.distanceTo(placeLocation))/1000;
-        //Toast.makeText(SelectedPlaceActivity.this, placeSelectedID, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(SelectedPlaceActivity.this, placeSelectedID, Toast.LENGTH_SHORT).show();
 
         //TODO REQUUEST_DENIED
-        new RequestTask().execute("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=40.6655101,-73.89188969999998&destinations=40.6905615%2C-73.9976592%7C40.6905615%2C-73.9976592%7C40.6905615%2C-73.9976592%7C40.6905615%2C-73.9976592%7C40.6905615%2C-73.9976592%7C40.6905615%2C-73.9976592%7C40.659569%2C-73.933783%7C40.729029%2C-73.851524%7C40.6860072%2C-73.6334271%7C40.598566%2C-73.7527626%7C40.659569%2C-73.933783%7C40.729029%2C-73.851524%7C40.6860072%2C-73.6334271%7C40.598566%2C-73.7527626&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
-        // RequestTask mytask = (RequestTask) new RequestTask().execute("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins="+ String.valueOf(lastLocation.getLatitude())+ ","+String.valueOf(lastLocation.getLongitude() + "&destinations="+ String.valueOf(placeLocation.getLatitude())+ "," +String.valueOf(placeLocation.getLongitude() +" &key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4")));
-        //Log.e("mytask", mytask.getStatus().toString());
+        //new RequestTask().execute("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=40.6655101,-73.89188969999998&destinations=40.6905615%2C-73.9976592%7C40.6905615%2C-73.9976592%7C40.6905615%2C-73.9976592%7C40.6905615%2C-73.9976592%7C40.6905615%2C-73.9976592%7C40.6905615%2C-73.9976592%7C40.659569%2C-73.933783%7C40.729029%2C-73.851524%7C40.6860072%2C-73.6334271%7C40.598566%2C-73.7527626%7C40.659569%2C-73.933783%7C40.729029%2C-73.851524%7C40.6860072%2C-73.6334271%7C40.598566%2C-73.7527626&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
+        new RequestTask().execute("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins="+ String.valueOf(lastLocation.getLatitude())+ ","+String.valueOf(lastLocation.getLongitude() + "&destinations="+ String.valueOf(placeLocation.getLatitude())+ "," +String.valueOf(placeLocation.getLongitude() +"&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4")));
+        // Log.e("mytask", mytask.getStatus().toString());
 
 
 
@@ -452,16 +452,21 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             String address = params[0];
             String response = "";
             try {
+                Log.e("dddd","dddd");
                 URL url = new URL(address);
+                Log.e("dddd",url + "");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.connect();
                 int status = connection.getResponseCode();
+                Log.e("dddd",status + "");
                 Scanner sc = new Scanner(connection.getInputStream());
                 while (sc.hasNextLine()) {
+                    Log.e("dddd1","dddd1");
                     response += sc.nextLine();
                 }
             } catch (IOException e) {
+                Log.e("dddd2","dddd2");
                 e.printStackTrace();
             }
             return response;
@@ -472,9 +477,18 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             try {
                 Log.e("ZAQVKATA",s);
                 JSONObject obj = new JSONObject(s);
-                JSONArray array = obj.getJSONArray("rows");
-                JSONArray array2 = array.getJSONArray(0);
-                distanceTV.setText(array2.getJSONObject(0).getString("text"));
+                JSONArray arrayRows = obj.getJSONArray("rows");
+                Log.e("ROWS",arrayRows.toString());
+                JSONObject firstRowObject = arrayRows.getJSONObject(0);
+                Log.e("tth",firstRowObject.toString());
+                JSONArray elementsArray = firstRowObject.getJSONArray("elements");
+                Log.e("elements",elementsArray.toString());
+                String distanceInMiles = elementsArray.getJSONObject(0).getJSONObject("distance").getString("text").split(" ")[0];
+                Log.e("distanceInMiles",distanceInMiles+"");
+                double distanceInKM = ((Double.parseDouble(distanceInMiles))*1.609344);
+                double distanceInKMToSecondSymbol = Math.floor(distanceInKM * 100) / 100;
+                Log.e("distanceInKM",distanceInKM+"");
+                distanceTV.setText(""+ distanceInKMToSecondSymbol + "KM,  "+ elementsArray.getJSONObject(0).getJSONObject("duration").getString("text"));
                // distanceTV.setText(obj.getJSONArray("rows").getJSONArray(0).getJSONObject(0).getString("distance"));
             } catch (JSONException e) {
                 e.printStackTrace();

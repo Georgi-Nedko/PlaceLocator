@@ -156,7 +156,7 @@ public class SearchResultsActivity extends AppCompatActivity {
             String address = params[0];
             String response = "";
             try {
-
+                Log.e("ADDRESS",address);
                 URL url = new URL(address);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
@@ -164,9 +164,11 @@ public class SearchResultsActivity extends AppCompatActivity {
                 int status = connection.getResponseCode();
                 Scanner sc = new Scanner(connection.getInputStream());
                 while (sc.hasNextLine()) {
+                    Log.e("ADDRESS3",address);
                     response += sc.nextLine();
                 }
             } catch (IOException e) {
+                Log.e("ADDRESS2",address);
                 e.printStackTrace();
             }
             return response;
@@ -176,20 +178,42 @@ public class SearchResultsActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             //TODO I've passed the request for place details according to the ID of the clicked place and I've put the json responce in the intent. Just put your activity name
             //TODO in the intent and take the json from the intent in your activity
+            Log.e("onpostexecute",s);
+            try {
+                JSONObject json = new JSONObject(s);
+                JSONObject resultsJSON = json.getJSONObject("result");
+                Log.e("RESULTS" , resultsJSON.toString());
+                JSONObject geometryJSON = resultsJSON.getJSONObject("geometry");
+                Log.e("GEOMETRY" , geometryJSON.toString());
+                double placeLatitude = (double) geometryJSON.getJSONObject("location").get("lat");
+                Log.e("placeLatitude" , placeLatitude + "");
+                double placeLongtitude = (double) geometryJSON.getJSONObject("location").get("lng");
+                Log.e("placeLongtitude" , placeLongtitude + "");
+                placeLocation = new Location("");
+                placeLocation.setLatitude(placeLatitude);
+                placeLocation.setLongitude(placeLongtitude);
 
-            Intent intent = new Intent(SearchResultsActivity.this, SelectedPlaceActivity.class);
-            intent.putExtra("json", s);
-           // intent.putExtra("lastLocation", phoneLocation);
-          //  intent.putExtra("placeLocation", placeLocation);
-           // intent.putExtra("distance",distanceInKM);
-            startActivity(intent);
 
-            Log.e("TAG JSON", s);
+                Intent intent = new Intent(SearchResultsActivity.this, SelectedPlaceActivity.class);
+                intent.putExtra("json", s);
+                intent.putExtra("lastLocation", phoneLocation);
+                intent.putExtra("placeLocation", placeLocation);
+                intent.putExtra("distance", distanceInKM);
+                startActivity(intent);
 
-            // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+
+
+
+                Log.e("TAGJSON", s);
+
+                // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
 
         }
-
     }
 
 }
