@@ -1,5 +1,7 @@
 package com.example.xcomputers.placelocator.model;
 
+import android.location.Location;
+
 /**
  * Created by xComputers on 29.9.2016 г..
  */
@@ -10,14 +12,15 @@ public class MyPlace {
     private float rating;
     private String placeID;
     private String distanceToPhone;
+    private Location location;
 
 
-    public MyPlace(String name, String address, float rating, String placeID, String distanceToPhone) {
+    public MyPlace(String name, String address, float rating, String placeID, Location location) {
         this.name = name;
         this.address = address;
         this.rating = rating;
         this.placeID = placeID;
-        this.distanceToPhone = distanceToPhone;
+        this.location = location;
 
 
     }
@@ -36,7 +39,7 @@ public class MyPlace {
     public String getID(){
         return this.placeID;
     }
-    public String getDistanceToPhone(){
-        return distanceToPhone;
+    public Location getLocation(){
+        return location;
     }
 }

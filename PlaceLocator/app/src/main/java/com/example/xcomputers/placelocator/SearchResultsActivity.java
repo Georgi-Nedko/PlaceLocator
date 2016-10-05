@@ -1,7 +1,6 @@
 package com.example.xcomputers.placelocator;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -40,9 +39,12 @@ public class SearchResultsActivity extends AppCompatActivity {
 
     private Location phoneLocation;
     private Location placeLocation;
-    private  String distanceInKMString;
+    private String distanceInKMString;
     private double result;
     private float distanceInKM;
+    private boolean distanceRequset;
+    private JSONObject myobj;
+    private String coordinates = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,32 +60,51 @@ public class SearchResultsActivity extends AppCompatActivity {
             JSONObject json = new JSONObject(getIntent().getStringExtra("json"));
             JSONArray array = json.getJSONArray("results");
             Log.e("TAG", "JSON ARRAY SIZE: " + array.length());
-            for(int i = 0; i < array.length(); i++){
-                JSONObject myobj = array.getJSONObject(i);
+            for (int i = 0; i < array.length(); i++) {
+                myobj = array.getJSONObject(i);
                 phoneLocation = getIntent().getParcelableExtra("lastLocation");
                 placeLocation = new Location("");
                 double placeLatitude = (double) myobj.getJSONObject("geometry").getJSONObject("location").get("lat");
                 double placeLongtitude = (double) myobj.getJSONObject("geometry").getJSONObject("location").get("lng");
                 placeLocation.setLatitude(placeLatitude);
                 placeLocation.setLongitude(placeLongtitude);
-                distanceInKM = (phoneLocation.distanceTo(placeLocation))/1000;
-                distanceInKMString = String.format("%.2f", distanceInKM);
-                if(!myobj.has("rating")){
-                    list.add(new MyPlace((String) myobj.get("name"), (String) myobj.get("vicinity"), 0, (String) myobj.get("place_id"), distanceInKMString));
-                }
-                else{
+                distanceRequset = true;
+                // distanceInKMString = String.format("%.2f", distanceInKMDouble);
+
+
+                if (!myobj.has("rating")) {
+
+                    list.add(new MyPlace((String) myobj.get("name"), (String) myobj.get("vicinity"), 0, (String) myobj.get("place_id"), placeLocation));
+                } else {
                     String x = String.valueOf(myobj.get("rating"));
                     float rating = Float.parseFloat(x);
-                    list.add(new MyPlace((String) myobj.get("name"), (String) myobj.get("vicinity"), rating, (String) myobj.get("place_id"), distanceInKMString));
+                    list.add(new MyPlace((String) myobj.get("name"), (String) myobj.get("vicinity"), rating, (String) myobj.get("place_id"), placeLocation));
                 }
 
+
+
+             //  if(placeLatitude < 0) {
+                   coordinates += String.valueOf(placeLatitude) + "," + String.valueOf(placeLongtitude);
+              // }
+              //  else if(placeLongtitude < 0)
+                //}else {
+                // coordinates += placeLatitude + "%2C" + placeLongtitude+"%7C";
+                //}
+
+
                 Log.e("TAG", "adding to list");
+               // new RequestTask().execute("https://maps.googleapis.com/maps/api/place/details/json?placeid="+ placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
+
+
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.e("COORDINATES", coordinates);
+        new RequestTask().execute("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" + String.valueOf(phoneLocation.getLatitude()) + "," + String.valueOf(phoneLocation.getLongitude() + "&destinations=" + coordinates + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4"));
 
+        distanceRequset = false;
         Collections.sort(list, new Comparator<MyPlace>() {
             @Override
             public int compare(MyPlace o1, MyPlace o2) {
@@ -91,7 +112,7 @@ public class SearchResultsActivity extends AppCompatActivity {
             }
         });
 
-        Log.e("TAG", "list size before setting the adapter" + list.size()+"");
+        Log.e("TAG", "list size before setting the adapter" + list.size() + "");
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SearchResultsRecyclerViewAdapter(SearchResultsActivity.this, list);
         recyclerView.setAdapter(adapter);
@@ -111,12 +132,12 @@ public class SearchResultsActivity extends AppCompatActivity {
                 Collections.sort(list, new Comparator<MyPlace>() {
                     @Override
                     public int compare(MyPlace o1, MyPlace o2) {
-                        switch(tab.getPosition()){
+                        switch (tab.getPosition()) {
                             case 0:
                                 return o1.getName().compareTo(o2.getName());
                             case 1:
-                                result = ((Double.parseDouble(o1.getDistanceToPhone())*1000) - (Double.parseDouble(o2.getDistanceToPhone())*1000));
-                                Log.e("TAG", "COMPARATOR RESULT DISTANCE: " +result);
+                                //result = ((Double.parseDouble(o1.getDistanceToPhone())*1000) - (Double.parseDouble(o2.getDistanceToPhone())*1000));
+                                Log.e("TAG", "COMPARATOR RESULT DISTANCE: " + result);
                                 return (int) result;
 
                             case 3:
@@ -161,16 +182,17 @@ public class SearchResultsActivity extends AppCompatActivity {
         }
     }
 
-    private SearchResultsRecyclerViewAdapter.onResultClickListener createClickListener(){
+    private SearchResultsRecyclerViewAdapter.onResultClickListener createClickListener() {
         return new SearchResultsRecyclerViewAdapter.onResultClickListener() {
             @Override
             public void onResultClicked(View view, int position) {
                 String placeID = list.get(position).getID();
                 Log.e("TAG", "onClick Item from list " + placeID);
-                new RequestTask().execute("https://maps.googleapis.com/maps/api/place/details/json?placeid="+ placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
+                new RequestTask().execute("https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
             }
         };
     }
+
     class RequestTask extends AsyncTask<String, Void, String> {
 
         @Override
@@ -186,11 +208,11 @@ public class SearchResultsActivity extends AppCompatActivity {
                 int status = connection.getResponseCode();
                 Scanner sc = new Scanner(connection.getInputStream());
                 while (sc.hasNextLine()) {
-                    Log.e("ADDRESS3",address);
+                    //  Log.e("ADDRESS3",address);
                     response += sc.nextLine();
                 }
             } catch (IOException e) {
-                Log.e("ADDRESS2",address);
+                // Log.e("ADDRESS2",address);
                 e.printStackTrace();
             }
             return response;
@@ -205,44 +227,64 @@ public class SearchResultsActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             //TODO I've passed the request for place details according to the ID of the clicked place and I've put the json responce in the intent. Just put your activity name
             //TODO in the intent and take the json from the intent in your activity
-            Log.e("onpostexecute",s);
-            try {
-                JSONObject json = new JSONObject(s);
-                JSONObject resultsJSON = json.getJSONObject("result");
-              // Log.e("RESULTS" , resultsJSON.toString());
-                JSONObject geometryJSON = resultsJSON.getJSONObject("geometry");
-                //Log.e("GEOMETRY" , geometryJSON.toString());
-                double placeLatitude = (double) geometryJSON.getJSONObject("location").get("lat");
-               // Log.e("placeLatitude" , placeLatitude + "");
-                double placeLongtitude = (double) geometryJSON.getJSONObject("location").get("lng");
-               // Log.e("placeLongtitude" , placeLongtitude + "");
-                placeLocation = new Location("");
-                placeLocation.setLatitude(placeLatitude);
-                placeLocation.setLongitude(placeLongtitude);
-
-
-
-                Intent intent = new Intent(SearchResultsActivity.this, SelectedPlaceActivity.class);
-                intent.putExtra("json", s);
-                intent.putExtra("lastLocation", phoneLocation);
-                intent.putExtra("placeLocation", placeLocation);
-                //intent.putExtra("distance", distanceInKM);
-                startActivity(intent);
-                hideProgressDialog();
-
-
+            //if(!distanceRequset) {
+            Log.e("onpostexecute", s);
+//            try {
+//                JSONObject json = new JSONObject(s);
+//                JSONObject resultsJSON = json.getJSONObject("result");
+//                // Log.e("RESULTS" , resultsJSON.toString());
+//                JSONObject geometryJSON = resultsJSON.getJSONObject("geometry");
+//                //Log.e("GEOMETRY" , geometryJSON.toString());
+//                double placeLatitude = (double) geometryJSON.getJSONObject("location").get("lat");
+//                // Log.e("placeLatitude" , placeLatitude + "");
+//                double placeLongtitude = (double) geometryJSON.getJSONObject("location").get("lng");
+//                // Log.e("placeLongtitude" , placeLongtitude + "");
+//                placeLocation = new Location("");
+//                placeLocation.setLatitude(placeLatitude);
+//                placeLocation.setLongitude(placeLongtitude);
+//
+//
+//                Intent intent = new Intent(SearchResultsActivity.this, SelectedPlaceActivity.class);
+//                intent.putExtra("json", s);
+//                intent.putExtra("lastLocation", phoneLocation);
+//                intent.putExtra("placeLocation", placeLocation);
+//                //intent.putExtra("distance", distanceInKM);
+//                startActivity(intent);
+//                hideProgressDialog();
 
 
                 Log.e("TAGJSON", s);
 
-            // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+                // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+//
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//            }else {
+//                try {
+//                    Log.e("ZAQVKATA", s);
+//                    JSONObject obj = new JSONObject(s);
+//                    JSONArray arrayRows = obj.getJSONArray("rows");
+//                    Log.e("ROWS", arrayRows.toString());
+//                    JSONObject firstRowObject = arrayRows.getJSONObject(0);
+//                    Log.e("tth", firstRowObject.toString());
+//                    JSONArray elementsArray = firstRowObject.getJSONArray("elements");
+//                    Log.e("elements", elementsArray.toString());
+//                    String distanceInMiles = elementsArray.getJSONObject(0).getJSONObject("distance").getString("text").split(" ")[0];
+//                    Log.e("distanceInMiles", distanceInMiles + "");
+//                    double distanceInKMDouble = ((Double.parseDouble(distanceInMiles)) * 1.609344);
+//                    double distanceInKMToSecondSymbol = Math.floor(distanceInKM * 100) / 100;
+//                    Log.e("distanceInKM", distanceInKM + "");
+//                    // distanceTV.setText(""+ distanceInKMToSecondSymbol + "KM,  "+ elementsArray.getJSONObject(0).getJSONObject("duration").getString("text"));
+//                    // distanceTV.setText(obj.getJSONArray("rows").getJSONArray(0).getJSONObject(0).getString("distance"));
+//
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
+//                }catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
 
         }
     }
-
 }
+

@@ -21,7 +21,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.xcomputers.placelocator.model.Category;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -56,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private TextView distanceKMTV;
     private SeekBar distanceSeekBar;
     private ProgressDialog mProgressDialog;
+    private Location placeLocation;
 
     private String myRadiusString;
     private double myRadiusDouble;
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Location lastLocation;
     private PlaceAutocompleteFragment autocompleteFragment;
     private static final int VOICE_RECOGNITION_REQUEST = 1;
+    private boolean distanceRequest;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         adapter.setOnItemClickListener(new CategoriesRecyclerViewAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                executeRequest(position, list);
+                executeRequest(position, list,false);
             }
         });
 
@@ -203,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
-    private void executeRequest(int position, List<Category> list){
+    private void executeRequest(int position, List<Category> list,boolean distanceRequest){
         String type = list.get(position).getType();
         new RequestTask().execute("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longtitude + "&radius=" + myRadiusString + "&type=" + type + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
 
@@ -306,11 +307,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         @Override
         protected void onPostExecute(String s) {
-            Intent intent = new Intent(MainActivity.this, SearchResultsActivity.class);
-            intent.putExtra("json", s);
-            intent.putExtra("lastLocation", lastLocation);
-            startActivity(intent);
-            hideProgressDialog();
+
+            //TODO make a new request
+           // if(distanceRequest) {
+
+
+                Intent intent = new Intent(MainActivity.this, SearchResultsActivity.class);
+                intent.putExtra("json", s);
+                intent.putExtra("lastLocation", lastLocation);
+                startActivity(intent);
+                hideProgressDialog();
+          //  }
+           // else{
+
+           // }
+
+
+
+
+
             Log.e("TAG", s);
            // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
 
