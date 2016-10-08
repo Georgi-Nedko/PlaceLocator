@@ -36,8 +36,14 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         adapter.setOnItemClickListener(new CategoriesRecyclerViewAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                executeRequest(position, list,false);
+                executeRequest(position, list);
             }
         });
 
@@ -204,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
-    private void executeRequest(int position, List<Category> list,boolean distanceRequest){
+    private void executeRequest(int position, List<Category> list){
         String type = list.get(position).getType();
         new RequestTask().execute("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longtitude + "&radius=" + myRadiusString + "&type=" + type + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
 
@@ -260,8 +266,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             latitude = String.valueOf(lastLocation.getLatitude());
             longtitude = String.valueOf(lastLocation.getLongitude());
             autocompleteFragment.setBoundsBias(toBounds(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), myRadiusDouble));
-
-
         }
         else{
             //TODO put a dialog to say the location and/or WIFI is not on and promp the user to turn it on
@@ -291,16 +295,60 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 connection.connect();
                 int status = connection.getResponseCode();
                 Scanner sc = new Scanner(connection.getInputStream());
-                while(sc.hasNextLine()){
+                while (sc.hasNextLine()) {
                     response += sc.nextLine();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            JSONObject json = null;
+
+            try {
+                json = new JSONObject(response);
+                JSONArray array = json.getJSONArray("results");
+                Log.e("TAG", "JSON ARRAY SIZE: " + array.length());
+                for (int i = 0; i < array.length(); i++) {
+                  JSONObject  myobj = array.getJSONObject(i);
+                    String placeID = (String) myobj.get("place_id");
+                    address = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=" + String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()) + "&destinations=place_id:" + placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4";
+                    URL url = new URL(address);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.connect();
+                    String distanceReponse = "";
+                    Scanner sc = new Scanner(connection.getInputStream());
+                    while (sc.hasNextLine()) {
+                        distanceReponse += sc.nextLine();
+                    }
+                    Log.e("DISTACE RESPONCE", distanceReponse);
+                    JSONObject distanceJson = new JSONObject(distanceReponse);
+                    JSONObject distanceRows = (JSONObject) distanceJson.getJSONArray("rows").get(0);
+                    JSONArray distanceElements = (JSONArray) distanceRows.getJSONArray("elements");
+                    JSONObject distanceAndDuration = distanceElements.getJSONObject(0); // distance and duration
+                    JSONObject distanceObj = distanceAndDuration.getJSONObject("distance");
+                    JSONObject durationObj = distanceAndDuration.getJSONObject("duration");
+
+                    JSONObject geometry = myobj.getJSONObject("geometry");
+                    geometry.put("distance",distanceObj);
+
+                    geometry.put("duration",durationObj);
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            response = json.toString();
             return response;
         }
 
-        @Override
+            @Override
         protected void onPreExecute() {
             showProgressDialog();
         }
@@ -309,25 +357,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         protected void onPostExecute(String s) {
 
             //TODO make a new request
-           // if(distanceRequest) {
-
 
                 Intent intent = new Intent(MainActivity.this, SearchResultsActivity.class);
                 intent.putExtra("json", s);
                 intent.putExtra("lastLocation", lastLocation);
                 startActivity(intent);
                 hideProgressDialog();
-          //  }
-           // else{
-
-           // }
-
-
-
-
 
             Log.e("TAG", s);
-           // Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
 
         }
 

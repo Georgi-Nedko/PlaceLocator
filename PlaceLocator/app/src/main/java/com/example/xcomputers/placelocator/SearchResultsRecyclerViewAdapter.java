@@ -47,7 +47,7 @@ public class SearchResultsRecyclerViewAdapter extends RecyclerView.Adapter<Searc
         holder.rating.setRating(place.getRating());
         holder.name.setText(place.getName());
         holder.address.setText(place.getAddress());
-        //holder.distanceToPhone.setText(place.getDistanceToPhone());
+        holder.distanceToPhone.setText(place.getDistanceToPhone());
 
     }
 
