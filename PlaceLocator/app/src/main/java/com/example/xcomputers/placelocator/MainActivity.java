@@ -105,8 +105,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         distanceKMTV.setTypeface(custom_font);
 
         distanceSeekBar = (SeekBar) findViewById(R.id.distance_seek_bar);
-        distanceTV = (TextView) findViewById(R.id.distance_middle_TV);
+        distanceSeekBar.setProgress(1);
+        myRadiusString = Integer.toString(distanceSeekBar.getProgress() * 1000);
 
+        distanceTV = (TextView) findViewById(R.id.distance_middle_TV);
+        distanceTV.setText(distanceSeekBar.getProgress() + "");
 
 
         voiceRecognitionButton = (Button) findViewById(R.id.button);
@@ -231,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
 
-        distanceTV.setText("1");
+
         distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -406,13 +409,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
                     connection.connect();
-                    String distanceReponse = "";
+                    String distanceResponse = "";
                     Scanner sc = new Scanner(connection.getInputStream());
                     while (sc.hasNextLine()) {
-                        distanceReponse += sc.nextLine();
+                        distanceResponse += sc.nextLine();
                     }
-                    Log.e("DISTACE RESPONCE", distanceReponse);
-                    JSONObject distanceJson = new JSONObject(distanceReponse);
+                    Log.e("DISTACE RESPONCE", distanceResponse);
+                    JSONObject distanceJson = new JSONObject(distanceResponse);
                     JSONObject distanceRows = (JSONObject) distanceJson.getJSONArray("rows").get(0);
                     JSONArray distanceElements = (JSONArray) distanceRows.getJSONArray("elements");
                     JSONObject distanceAndDuration = distanceElements.getJSONObject(0); // distance and duration
@@ -445,8 +448,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         @Override
         protected void onPostExecute(String s) {
-
-            //TODO make a new request
 
                 Intent intent = new Intent(MainActivity.this, SearchResultsActivity.class);
                 intent.putExtra("json", s);

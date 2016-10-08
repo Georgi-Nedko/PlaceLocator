@@ -196,11 +196,11 @@ public class SearchResultsActivity extends AppCompatActivity {
                 int status = connection.getResponseCode();
                 Scanner sc = new Scanner(connection.getInputStream());
                 while (sc.hasNextLine()) {
-                    //  Log.e("ADDRESS3",address);
+
                     response += sc.nextLine();
                 }
             } catch (IOException e) {
-                // Log.e("ADDRESS2",address);
+
                 e.printStackTrace();
             }
             return response;
@@ -213,25 +213,7 @@ public class SearchResultsActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String s) {
-            //TODO I've passed the request for place details according to the ID of the clicked place and I've put the json responce in the intent. Just put your activity name
-            //TODO in the intent and take the json from the intent in your activity
-            //if(!distanceRequset) {
-            Log.e("onpostexecute", s);
-//            try {
-//                JSONObject json = new JSONObject(s);
-//                JSONObject resultsJSON = json.getJSONObject("result");
-//
-//                JSONObject geometryJSON = resultsJSON.getJSONObject("geometry");
-//
-//                double placeLatitude = (double) geometryJSON.getJSONObject("location").get("lat");
-//                // Log.e("placeLatitude" , placeLatitude + "");
-//                double placeLongtitude = (double) geometryJSON.getJSONObject("location").get("lng");
-//                // Log.e("placeLongtitude" , placeLongtitude + "");
-//                placeLocation = new Location("");
-//                placeLocation.setLatitude(placeLatitude);
-//                placeLocation.setLongitude(placeLongtitude);
-//
-//
+
             Intent intent = new Intent(SearchResultsActivity.this, SelectedPlaceActivity.class);
             intent.putExtra("json", s);
             intent.putExtra("lastLocation", phoneLocation);
