@@ -1,17 +1,29 @@
 package com.example.xcomputers.placelocator;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,13 +33,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.xcomputers.placelocator.model.Category;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
@@ -69,8 +89,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private GoogleSignInOptions gso;
     private Location lastLocation;
     private PlaceAutocompleteFragment autocompleteFragment;
-    private static final int VOICE_RECOGNITION_REQUEST = 1;
-    private boolean distanceRequest;
+    private static final int VOICE_RECOGNITION_REQUEST = 200;
+    private static final int REQUEST_CHECK_SETTINGS = 0x1;
+    private Dialog alertDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +121,48 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     .addApi(LocationServices.API)
                     .build();
         }
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(client, builder.build());
+
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult locationSettingsResult) {
+
+                final Status status = locationSettingsResult.getStatus();
+                final LocationSettingsStates LS_state = locationSettingsResult.getLocationSettingsStates();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        // All location settings are satisfied. The client can initialize location
+                        // requests here.
+
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the user
+                        // a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+
+                        break;
+                }
+            }
+        });
 
         voiceRecognitionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,7 +191,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 //TODO Intent to more info screen with place information
                 String placeID = place.getId();
                 Intent intent = new Intent(MainActivity.this, SelectedPlaceActivity.class);
-                intent.putExtra("placeID", placeID);
+                intent.putExtra("json", placeID);
+                intent.putExtra("lastLocation", lastLocation);
+                LatLng latLng = place.getLatLng();
+                Location placeLocation = new Location("");
+                placeLocation.setLongitude(latLng.longitude);
+                placeLocation.setLatitude(latLng.latitude);
+                intent.putExtra("placeLocation", placeLocation);
                 Log.i("TAG", "Place: " + place.getName());
                 startActivity(intent);
             }
@@ -150,7 +220,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         adapter.setOnItemClickListener(new CategoriesRecyclerViewAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                executeRequest(position, list);
+                if(lastLocation != null){
+                    executeRequest(position, list);
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "Please turn on your location services", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -190,6 +265,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             String text = results.get(0).replace("'", "");
             autocompleteFragment.setText(text);
             autocompleteFragment.getView().findViewById(com.google.android.gms.R.id.place_autocomplete_search_input).performClick();
+        }
+        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
+        switch (requestCode) {
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        // The user was asked to change settings, but chose not to
+
+                        break;
+                    default:
+                        break;
+                }
+                break;
         }
 
     }
@@ -372,7 +462,56 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     protected void onStart() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        if(!isConnectingToInternet()){
+            builder.setTitle("Internet Services Not Active");
+            builder.setMessage("Please enable Internet Services");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    // Show location settings when the user acknowledges the alert dialog
+                    Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                    startActivity(intent);
+                }
+            });
+            alertDialog = builder.create();
+            alertDialog.setCanceledOnTouchOutside(false);
+            alertDialog.show();
+        }
         client.connect();
         super.onStart();
+    }
+    public boolean isConnectingToInternet(){
+            ConnectivityManager connectivityManager = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Network[] networks = connectivityManager.getAllNetworks();
+                NetworkInfo networkInfo;
+                for (Network mNetwork : networks) {
+                    networkInfo = connectivityManager.getNetworkInfo(mNetwork);
+                    if (networkInfo.getState().equals(NetworkInfo.State.CONNECTED)) {
+                        return true;
+                    }
+                }
+            }else {
+                if (connectivityManager != null) {
+                    //noinspection deprecation
+                    NetworkInfo[] info = connectivityManager.getAllNetworkInfo();
+                    if (info != null) {
+                        for (NetworkInfo anInfo : info) {
+                            if (anInfo.getState() == NetworkInfo.State.CONNECTED) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+
+    @Override
+    protected void onStop() {
+        if(alertDialog != null)
+            alertDialog.hide();
+        super.onStop();
     }
 }

@@ -1,11 +1,18 @@
 package com.example.xcomputers.placelocator;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.Typeface;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -19,19 +26,28 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks{
     private static final int RC_SIGN_IN = 9001;
 
-    TextView welcomeTV;
-    GoogleApiClient mGoogleApiClient;
+    private TextView welcomeTV;
+    protected GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
-    SignInButton signInButton;
+    private SignInButton signInButton;
     private String accName;
+    private boolean locationIsOn;
 
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +87,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
     }
+
+
+
+
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -96,6 +116,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
 
     private void handleSignInResult(GoogleSignInResult result) {
+
         Log.e("TAG", "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
@@ -114,6 +135,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     @Override
     public void onStart() {
+
         mGoogleApiClient.connect();
         showProgressDialog();
 
@@ -123,6 +145,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             // and the GoogleSignInResult will be available instantly.
 
             GoogleSignInResult result = opr.get();
+
             handleSignInResult(result);
         } else {
             // If the user has not previously signed in on this device or the sign-in has expired,
@@ -163,17 +186,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
-    private void updateUI(boolean signedIn) {
-        if (signedIn) {
-            //findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-        } else {
-            //mStatusTextView.setText(R.string.signed_out);
-
-            //findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-           // findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
-        }
-    }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
