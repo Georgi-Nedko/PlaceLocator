@@ -6,41 +6,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+
     tools:context="com.example.xcomputers.placelocator.SelectedPlaceActivity">
 
     <!-- TODO: Update blank fragment layout -->
 
 
-    <HorizontalScrollView
+
+
+    <ViewFlipper
         android:id="@+id/details_photo_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="240dp"
         android:layout_alignParentTop="true"
-        android:background="#00ffffff"
         >
 
 
-        <LinearLayout
-            android:id="@+id/details_photo_holder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-
-            android:background="@drawable/login_background">
-
-        </LinearLayout>
-
-    </HorizontalScrollView>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="#00ffffff"
-        android:layout_alignTop="@+id/details_social_layout"
-        android:layout_alignLeft="@+id/details_social_layout"
-        android:layout_alignRight="@+id/details_social_layout"
-        android:scaleY="-1">
-    </FrameLayout>
+    </ViewFlipper>
 
     <LinearLayout
         android:id="@+id/details_social_layout"
@@ -240,6 +222,27 @@
     </LinearLayout>
 
 
+    <TextView
+        android:id="@+id/details_ETA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="@android:color/white"
+        android:textSize="15sp"
+        android:layout_below="@+id/details_address"
+        android:layout_alignLeft="@+id/details_address"
+        android:layout_alignStart="@+id/details_address" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#00ffffff"
+        android:scaleY="-1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+    </FrameLayout>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
@@ -265,17 +268,6 @@
             android:layout_gravity="center" />
 
     </FrameLayout>
-
-    <TextView
-        android:id="@+id/details_ETA"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textColor="@android:color/white"
-        android:textSize="15sp"
-        android:layout_below="@+id/details_address"
-        android:layout_alignLeft="@+id/details_address"
-        android:layout_alignStart="@+id/details_address" />
 
 
 </RelativeLayout>
