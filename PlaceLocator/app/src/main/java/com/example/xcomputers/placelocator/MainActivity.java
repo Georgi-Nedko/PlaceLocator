@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
     private Dialog alertDialog;
     private String autocompletePlaceID;
+    boolean isLocationOn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,8 +217,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         adapter.setOnItemClickListener(new CategoriesRecyclerViewAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
+                if(isLocationOn){
+                    onConnected(null);
+                }
                 if(lastLocation != null){
                     executeRequest(position, list);
+
                 }
                 else{
                     Toast.makeText(MainActivity.this, "Please turn on your location services", Toast.LENGTH_SHORT).show();
@@ -267,6 +272,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
                     case Activity.RESULT_OK:
+                        isLocationOn = true;
+                        onConnected(null);
+                        hideProgressDialog();
                         break;
                     case Activity.RESULT_CANCELED:
                         // The user was asked to change settings, but chose not to
@@ -280,11 +288,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-    private void showProgressDialog() {
+    private void showProgressDialog(boolean location) {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage("Loading...");
+            if(location){
+                mProgressDialog.setMessage("Obtaining Location...");
+            }
+            else{
+                mProgressDialog.setMessage("Loading...");
+            }
             mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.setCanceledOnTouchOutside(false);
         }
 
         mProgressDialog.show();
@@ -354,9 +369,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             autocompleteFragment.setBoundsBias(toBounds(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), myRadiusDouble));
         }
         else{
-            //TODO put a dialog to say the location and/or WIFI is not on and promp the user to turn it on
+           showProgressDialog(true);
         }
     }
+
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -419,7 +435,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                         JSONObject geometry = myobj.getJSONObject("geometry");
                         geometry.put("distance", distanceObj);
-
                         geometry.put("duration", durationObj);
 
                     }
@@ -463,11 +478,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             return response;
         }
 
-        
+
 
             @Override
         protected void onPreExecute() {
-            showProgressDialog();
+            showProgressDialog(false);
         }
 
         @Override

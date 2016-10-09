@@ -44,7 +44,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     protected GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
     private SignInButton signInButton;
-    private String accName;
     private boolean locationIsOn;
 
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
@@ -121,8 +120,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
-            accName = acct.getDisplayName();
-            Log.e("TAG", accName);
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -194,7 +191,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
     public void changeScreen(){
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        intent.putExtra("name", accName);
         startActivity(intent);
         hideProgressDialog();
     }
