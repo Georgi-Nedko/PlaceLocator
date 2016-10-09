@@ -4,11 +4,14 @@ package com.example.xcomputers.placelocator;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -22,6 +25,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.example.xcomputers.placelocator.model.Commentator;
+import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +36,7 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import io.techery.properratingbar.ProperRatingBar;
@@ -54,6 +61,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
     //private String placeSelectedID;
     private static Float kilometers;
     private LinearLayout imagesLL;
+    private RecyclerView commentsRecyclerView;
 
     String uri;
     ImageView mImageView;
@@ -68,6 +76,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
     Bitmap loadingImageBM;
     Bitmap noImageBM;
     ImageView loadingImage;
+    private ArrayList<Commentator> commentators;
 
 
     @Override
@@ -111,6 +120,17 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         images = new LinkedList<>();
         MyViewFlipper = (ViewFlipper) findViewById(R.id.details_photo_scroll_view);
 
+        commentsRecyclerView = (RecyclerView) findViewById(R.id.comments_RV);
+        commentsRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this).color(Color.WHITE).build());
+        commentators = new ArrayList<>();
+        //addAllCommentators();
+        //addAllCategories(list);
+
+        commentsRecyclerView.setLayoutManager(new LinearLayoutManager(SelectedPlaceActivity.this));
+        SelectedPlaceRecyclerViewAdapter adapter = new SelectedPlaceRecyclerViewAdapter(SelectedPlaceActivity.this, commentators);
+        commentsRecyclerView.setAdapter(adapter);
+
+
 
 
         nameScrollTextView.setSelected(true);
@@ -121,33 +141,65 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         try {
             JSONObject jObject = new JSONObject(placeSelectedJSON);
             JSONObject jObjectResult = (JSONObject) jObject.get("result");
-
-            if(!jObjectResult.isNull("photos")) {
-                JSONArray photos = (JSONArray) jObjectResult.get("photos");
-                for(int i = 0; i < photos.length();i++){
-                    Log.e("PHOTOSSSS", photos.toString());
-                    Log.e("photoreference","" + photos.getJSONObject(i).getString("photo_reference"));
-                    new ImageDownloaderTask(new ImageView(SelectedPlaceActivity.this)).execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference="+ photos.getJSONObject(i).getString("photo_reference") + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
-                }
-
-
-
+            if(!jObjectResult.isNull("reviews")){
+                addAllCommentators(jObjectResult,commentators);
+                if(!jObjectResult.isNull("photos")) {
+                    JSONArray photos = (JSONArray) jObjectResult.get("photos");
+                    for(int i = 0; i < photos.length();i++){
+                        Log.e("PHOTOSSSS", photos.toString());
+                        Log.e("photoreference","" + photos.getJSONObject(i).getString("photo_reference"));
+                        new ImageDownloaderTask(new ImageView(SelectedPlaceActivity.this)).execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference="+ photos.getJSONObject(i).getString("photo_reference") + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
+                    }
 
 
 
-                if (jObjectResult.isNull("formatted_phone_number")) {
-                    phoneTV = "no phone";
-                    if (jObjectResult.isNull("formatted_address")) {
-                        addressTV.setText("dsadsaasd");
-                    } else {
-                        addressTV.setText(jObjectResult.getString("formatted_address"));
-                        nameScrollTextView.setText(jObjectResult.getString("name"));
-                        if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
-                            openTimeTV.setText("Not given open time!");
-                            Toast.makeText(SelectedPlaceActivity.this, "open time  are null", Toast.LENGTH_SHORT).show();
+
+
+
+                    if (jObjectResult.isNull("formatted_phone_number")) {
+                        phoneTV = "no phone";
+                        if (jObjectResult.isNull("formatted_address")) {
+                            addressTV.setText("dsadsaasd");
                         } else {
-                            openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
+                            addressTV.setText(jObjectResult.getString("formatted_address"));
+                            nameScrollTextView.setText(jObjectResult.getString("name"));
+                            if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
+                                openTimeTV.setText("Not given open time!");
+                                Toast.makeText(SelectedPlaceActivity.this, "open time  are null", Toast.LENGTH_SHORT).show();
+                            } else {
+                                openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
 
+                                if (jObjectResult.isNull("rating")) {
+                                    Toast.makeText(SelectedPlaceActivity.this, "rating is null", Toast.LENGTH_SHORT).show();
+                                    myRB.setRating(0);
+                                    myRatingBarTV.setText(myRB.getRating() + "");
+                                    if (!jObjectResult.isNull("website")) {
+                                        uri = jObjectResult.getString("website");
+                                    }
+                                } else {
+                                    myRB.setRating((float) jObjectResult.getDouble("rating"));
+                                    myRatingBarTV.setText(myRB.getRating() + "");
+                                    if (jObjectResult.isNull("website")) {
+                                        uri = jObjectResult.getString("website");
+                                    }
+                                }
+                            }
+                        }
+
+                    } else {
+                        phoneTV = (jObjectResult.getString("formatted_phone_number"));
+                        if (jObjectResult.isNull("formatted_address")) {
+                            Toast.makeText(SelectedPlaceActivity.this, "address is null", Toast.LENGTH_SHORT).show();
+                            addressTV.setText("dsadsaasd");
+                        } else {
+                            addressTV.setText(jObjectResult.getString("formatted_address"));
+                            nameScrollTextView.setText(jObjectResult.getString("name"));
+                            if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
+                                Toast.makeText(SelectedPlaceActivity.this, "open time is null", Toast.LENGTH_SHORT).show();
+                                openTimeTV.setText("Not given open time!");
+                            } else {
+                                openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
+                            }
                             if (jObjectResult.isNull("rating")) {
                                 Toast.makeText(SelectedPlaceActivity.this, "rating is null", Toast.LENGTH_SHORT).show();
                                 myRB.setRating(0);
@@ -158,68 +210,144 @@ public class SelectedPlaceActivity extends AppCompatActivity {
                             } else {
                                 myRB.setRating((float) jObjectResult.getDouble("rating"));
                                 myRatingBarTV.setText(myRB.getRating() + "");
-                                if (jObjectResult.isNull("website")) {
+                                if (!jObjectResult.isNull("website")) {
                                     uri = jObjectResult.getString("website");
                                 }
                             }
-                        }
-                    }
-
-                } else {
-                    phoneTV = (jObjectResult.getString("formatted_phone_number"));
-                    if (jObjectResult.isNull("formatted_address")) {
-                        Toast.makeText(SelectedPlaceActivity.this, "address is null", Toast.LENGTH_SHORT).show();
-                        addressTV.setText("dsadsaasd");
-                    } else {
-                        addressTV.setText(jObjectResult.getString("formatted_address"));
-                        nameScrollTextView.setText(jObjectResult.getString("name"));
-                        if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
-                            Toast.makeText(SelectedPlaceActivity.this, "open time is null", Toast.LENGTH_SHORT).show();
-                            openTimeTV.setText("Not given open time!");
-                        } else {
-                            openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
-                        }
-                        if (jObjectResult.isNull("rating")) {
-                            Toast.makeText(SelectedPlaceActivity.this, "rating is null", Toast.LENGTH_SHORT).show();
-                            myRB.setRating(0);
-                            myRatingBarTV.setText(myRB.getRating() + "");
-                            if (!jObjectResult.isNull("website")) {
-                                uri = jObjectResult.getString("website");
-                            }
-                        } else {
-                            myRB.setRating((float) jObjectResult.getDouble("rating"));
-                            myRatingBarTV.setText(myRB.getRating() + "");
-                            if (!jObjectResult.isNull("website")) {
-                                uri = jObjectResult.getString("website");
-                            }
-                        }
 
 
+                        }
                     }
                 }
+                else{
+                    images.add(noImageBM);
+                    ImageView noImage = new ImageView(SelectedPlaceActivity.this);
+                    noImage.setImageBitmap(noImageBM);
+                    noImage.setScaleType(ImageView.ScaleType.FIT_XY);
+                    //newImageView.getLayoutParams().height = 20;
+                    //newImageView.getLayoutParams().width = MyViewFlipper.getWidth();
+                    MyViewFlipper.addView(noImage);
+
+                    if (jObjectResult.isNull("formatted_phone_number")) {
+                        phoneTV = "no phone";
+                        if (jObjectResult.isNull("formatted_address")) {
+                            addressTV.setText("dsadsaasd");
+                        } else {
+                            addressTV.setText(jObjectResult.getString("formatted_address"));
+                            nameScrollTextView.setText(jObjectResult.getString("name"));
+                            if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
+                                openTimeTV.setText("Not given open time!");
+                                Toast.makeText(SelectedPlaceActivity.this, "open time  are null", Toast.LENGTH_SHORT).show();
+                            } else {
+                                openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
+
+                                if (jObjectResult.isNull("rating")) {
+                                    Toast.makeText(SelectedPlaceActivity.this, "rating is null", Toast.LENGTH_SHORT).show();
+                                    myRB.setRating(0);
+                                    myRatingBarTV.setText(myRB.getRating() + "");
+                                    if (!jObjectResult.isNull("website")) {
+                                        uri = jObjectResult.getString("website");
+                                    }
+                                } else {
+                                    myRB.setRating((float) jObjectResult.getDouble("rating"));
+                                    myRatingBarTV.setText(myRB.getRating() + "");
+                                    if (jObjectResult.isNull("website")) {
+                                        uri = jObjectResult.getString("website");
+                                    }
+                                }
+                            }
+                        }
+
+                    } else {
+                        phoneTV = (jObjectResult.getString("formatted_phone_number"));
+                        if (jObjectResult.isNull("formatted_address")) {
+                            Toast.makeText(SelectedPlaceActivity.this, "address is null", Toast.LENGTH_SHORT).show();
+                            addressTV.setText("dsadsaasd");
+                        } else {
+                            addressTV.setText(jObjectResult.getString("formatted_address"));
+                            nameScrollTextView.setText(jObjectResult.getString("name"));
+                            if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
+                                Toast.makeText(SelectedPlaceActivity.this, "open time is null", Toast.LENGTH_SHORT).show();
+                                openTimeTV.setText("Not given open time!");
+                            } else {
+                                openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
+                            }
+                            if (jObjectResult.isNull("rating")) {
+                                Toast.makeText(SelectedPlaceActivity.this, "rating is null", Toast.LENGTH_SHORT).show();
+                                myRB.setRating(0);
+                                myRatingBarTV.setText(myRB.getRating() + "");
+                                if (!jObjectResult.isNull("website")) {
+                                    uri = jObjectResult.getString("website");
+                                }
+                            } else {
+                                myRB.setRating((float) jObjectResult.getDouble("rating"));
+                                myRatingBarTV.setText(myRB.getRating() + "");
+                                if (!jObjectResult.isNull("website")) {
+                                    uri = jObjectResult.getString("website");
+                                }
+                            }
+
+
+                        }
+                    }
+                }
+
             }
+            //////////////////////////////////////////////////////////////////////////////////////////////
             else{
-                images.add(noImageBM);
-                ImageView noImage = new ImageView(SelectedPlaceActivity.this);
-                noImage.setImageBitmap(noImageBM);
-                noImage.setScaleType(ImageView.ScaleType.FIT_XY);
-                //newImageView.getLayoutParams().height = 20;
-                //newImageView.getLayoutParams().width = MyViewFlipper.getWidth();
-                MyViewFlipper.addView(noImage);
 
-                if (jObjectResult.isNull("formatted_phone_number")) {
-                    phoneTV = "no phone";
-                    if (jObjectResult.isNull("formatted_address")) {
-                        addressTV.setText("dsadsaasd");
-                    } else {
-                        addressTV.setText(jObjectResult.getString("formatted_address"));
-                        nameScrollTextView.setText(jObjectResult.getString("name"));
-                        if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
-                            openTimeTV.setText("Not given open time!");
-                            Toast.makeText(SelectedPlaceActivity.this, "open time  are null", Toast.LENGTH_SHORT).show();
+                if(!jObjectResult.isNull("photos")) {
+                    JSONArray photos = (JSONArray) jObjectResult.get("photos");
+                    for(int i = 0; i < photos.length();i++){
+                        Log.e("PHOTOSSSS", photos.toString());
+                        Log.e("photoreference","" + photos.getJSONObject(i).getString("photo_reference"));
+                        new ImageDownloaderTask(new ImageView(SelectedPlaceActivity.this)).execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference="+ photos.getJSONObject(i).getString("photo_reference") + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
+                    }
+
+                    if (jObjectResult.isNull("formatted_phone_number")) {
+                        phoneTV = "no phone";
+                        if (jObjectResult.isNull("formatted_address")) {
+                            addressTV.setText("dsadsaasd");
                         } else {
-                            openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
+                            addressTV.setText(jObjectResult.getString("formatted_address"));
+                            nameScrollTextView.setText(jObjectResult.getString("name"));
+                            if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
+                                openTimeTV.setText("Not given open time!");
+                                Toast.makeText(SelectedPlaceActivity.this, "open time  are null", Toast.LENGTH_SHORT).show();
+                            } else {
+                                openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
 
+                                if (jObjectResult.isNull("rating")) {
+                                    Toast.makeText(SelectedPlaceActivity.this, "rating is null", Toast.LENGTH_SHORT).show();
+                                    myRB.setRating(0);
+                                    myRatingBarTV.setText(myRB.getRating() + "");
+                                    if (!jObjectResult.isNull("website")) {
+                                        uri = jObjectResult.getString("website");
+                                    }
+                                } else {
+                                    myRB.setRating((float) jObjectResult.getDouble("rating"));
+                                    myRatingBarTV.setText(myRB.getRating() + "");
+                                    if (jObjectResult.isNull("website")) {
+                                        uri = jObjectResult.getString("website");
+                                    }
+                                }
+                            }
+                        }
+
+                    } else {
+                        phoneTV = (jObjectResult.getString("formatted_phone_number"));
+                        if (jObjectResult.isNull("formatted_address")) {
+                            Toast.makeText(SelectedPlaceActivity.this, "address is null", Toast.LENGTH_SHORT).show();
+                            addressTV.setText("dsadsaasd");
+                        } else {
+                            addressTV.setText(jObjectResult.getString("formatted_address"));
+                            nameScrollTextView.setText(jObjectResult.getString("name"));
+                            if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
+                                Toast.makeText(SelectedPlaceActivity.this, "open time is null", Toast.LENGTH_SHORT).show();
+                                openTimeTV.setText("Not given open time!");
+                            } else {
+                                openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
+                            }
                             if (jObjectResult.isNull("rating")) {
                                 Toast.makeText(SelectedPlaceActivity.this, "rating is null", Toast.LENGTH_SHORT).show();
                                 myRB.setRating(0);
@@ -230,46 +358,88 @@ public class SelectedPlaceActivity extends AppCompatActivity {
                             } else {
                                 myRB.setRating((float) jObjectResult.getDouble("rating"));
                                 myRatingBarTV.setText(myRB.getRating() + "");
-                                if (jObjectResult.isNull("website")) {
+                                if (!jObjectResult.isNull("website")) {
                                     uri = jObjectResult.getString("website");
                                 }
                             }
-                        }
-                    }
-
-                } else {
-                    phoneTV = (jObjectResult.getString("formatted_phone_number"));
-                    if (jObjectResult.isNull("formatted_address")) {
-                        Toast.makeText(SelectedPlaceActivity.this, "address is null", Toast.LENGTH_SHORT).show();
-                        addressTV.setText("dsadsaasd");
-                    } else {
-                        addressTV.setText(jObjectResult.getString("formatted_address"));
-                        nameScrollTextView.setText(jObjectResult.getString("name"));
-                        if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
-                            Toast.makeText(SelectedPlaceActivity.this, "open time is null", Toast.LENGTH_SHORT).show();
-                            openTimeTV.setText("Not given open time!");
-                        } else {
-                            openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
-                        }
-                        if (jObjectResult.isNull("rating")) {
-                            Toast.makeText(SelectedPlaceActivity.this, "rating is null", Toast.LENGTH_SHORT).show();
-                            myRB.setRating(0);
-                            myRatingBarTV.setText(myRB.getRating() + "");
-                            if (!jObjectResult.isNull("website")) {
-                                uri = jObjectResult.getString("website");
-                            }
-                        } else {
-                            myRB.setRating((float) jObjectResult.getDouble("rating"));
-                            myRatingBarTV.setText(myRB.getRating() + "");
-                            if (!jObjectResult.isNull("website")) {
-                                uri = jObjectResult.getString("website");
-                            }
-                        }
 
 
+                        }
                     }
                 }
+                else{
+                    images.add(noImageBM);
+                    ImageView noImage = new ImageView(SelectedPlaceActivity.this);
+                    noImage.setImageBitmap(noImageBM);
+                    noImage.setScaleType(ImageView.ScaleType.FIT_XY);
+                    MyViewFlipper.addView(noImage);
+
+                    if (jObjectResult.isNull("formatted_phone_number")) {
+                        phoneTV = "no phone";
+                        if (jObjectResult.isNull("formatted_address")) {
+                            addressTV.setText("dsadsaasd");
+                        } else {
+                            addressTV.setText(jObjectResult.getString("formatted_address"));
+                            nameScrollTextView.setText(jObjectResult.getString("name"));
+                            if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
+                                openTimeTV.setText("Not given open time!");
+                                Toast.makeText(SelectedPlaceActivity.this, "open time  are null", Toast.LENGTH_SHORT).show();
+                            } else {
+                                openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
+
+                                if (jObjectResult.isNull("rating")) {
+                                    Toast.makeText(SelectedPlaceActivity.this, "rating is null", Toast.LENGTH_SHORT).show();
+                                    myRB.setRating(0);
+                                    myRatingBarTV.setText(myRB.getRating() + "");
+                                    if (!jObjectResult.isNull("website")) {
+                                        uri = jObjectResult.getString("website");
+                                    }
+                                } else {
+                                    myRB.setRating((float) jObjectResult.getDouble("rating"));
+                                    myRatingBarTV.setText(myRB.getRating() + "");
+                                    if (jObjectResult.isNull("website")) {
+                                        uri = jObjectResult.getString("website");
+                                    }
+                                }
+                            }
+                        }
+
+                    } else {
+                        phoneTV = (jObjectResult.getString("formatted_phone_number"));
+                        if (jObjectResult.isNull("formatted_address")) {
+                            Toast.makeText(SelectedPlaceActivity.this, "address is null", Toast.LENGTH_SHORT).show();
+                            addressTV.setText("dsadsaasd");
+                        } else {
+                            addressTV.setText(jObjectResult.getString("formatted_address"));
+                            nameScrollTextView.setText(jObjectResult.getString("name"));
+                            if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
+                                Toast.makeText(SelectedPlaceActivity.this, "open time is null", Toast.LENGTH_SHORT).show();
+                                openTimeTV.setText("Not given open time!");
+                            } else {
+                                openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
+                            }
+                            if (jObjectResult.isNull("rating")) {
+                                Toast.makeText(SelectedPlaceActivity.this, "rating is null", Toast.LENGTH_SHORT).show();
+                                myRB.setRating(0);
+                                myRatingBarTV.setText(myRB.getRating() + "");
+                                if (!jObjectResult.isNull("website")) {
+                                    uri = jObjectResult.getString("website");
+                                }
+                            } else {
+                                myRB.setRating((float) jObjectResult.getDouble("rating"));
+                                myRatingBarTV.setText(myRB.getRating() + "");
+                                if (!jObjectResult.isNull("website")) {
+                                    uri = jObjectResult.getString("website");
+                                }
+                            }
+
+
+                        }
+                    }
+                }
+
             }
+
 
 
 
@@ -278,11 +448,6 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             e1.printStackTrace();
         }
         distanceTV.setText(getIntent().getStringExtra("distance") + " , " + getIntent().getStringExtra("duration"));
-
-
-
-
-
 
 
         //getting from json and put
@@ -359,23 +524,23 @@ public class SelectedPlaceActivity extends AppCompatActivity {
                 bitmap = null;
             }
 
-            if (imageViewReference != null) {
-                ImageView imageView = imageViewReference.get();
-                if (imageView != null) {
-                    if (bitmap != null) {
+           // if (imageViewReference != null) {
+               // ImageView imageView = imageViewReference.get();
+               // if (imageView != null) {
+                   // if (bitmap != null) {
                         images.add(bitmap);
                         ImageView newImageView = new ImageView(SelectedPlaceActivity.this);
                        // newImageView.setLayoutParams(new FrameLayout.LayoutParams(MyViewFlipper.getWidth(),MyViewFlipper.getHeight()));
                         MyViewFlipper.addView(newImageView);
                         Log.e("IMAGESADD",bitmap.toString());
                         Log.e("IMAGES1",images.size()+ "");
-                    } else {
-                        Toast.makeText(SelectedPlaceActivity.this, "NO PHOTOS", Toast.LENGTH_SHORT).show();
+                  //  } else {
+                      //  Toast.makeText(SelectedPlaceActivity.this, "NO PHOTOS", Toast.LENGTH_SHORT).show();
 
-                    }
-                }
+                   // }
+             //   }
 
-            }
+           // }
 
 
 
@@ -402,7 +567,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             }
 
             MyViewFlipper.startFlipping();
-            if(images.size() <=  1) {
+            if(images.size() <= 1) {
                 MyViewFlipper.stopFlipping();
             }
 
@@ -439,5 +604,16 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
         }
         return null;
+    }
+
+    void addAllCommentators(JSONObject jsonObject, ArrayList<Commentator> commentators) throws JSONException {
+        JSONArray reviews = jsonObject.getJSONArray("reviews");
+        for(int i = 0; i < reviews.length();i++){
+            String name = reviews.getJSONObject(i).getString("author_name");
+            String description = reviews.getJSONObject(i).getString("text");
+            float rating = (float) reviews.getJSONObject(i).getDouble("rating");
+            commentators.add(new Commentator(name,description,rating));
+
+        }
     }
 }

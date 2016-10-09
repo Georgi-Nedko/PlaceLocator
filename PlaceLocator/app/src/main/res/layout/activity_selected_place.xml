@@ -21,7 +21,6 @@
         android:layout_alignParentTop="true"
         >
 
-
     </ViewFlipper>
 
     <LinearLayout
@@ -106,26 +105,6 @@
         <!-- android:background="@drawable/black_gradient"-->
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/details_address"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="botevgradsko shose 11"
-        android:textSize="20sp"
-        android:textColor="@android:color/white"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_below="@+id/details_photo_scroll_view"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:singleLine="true"
-        android:freezesText="true"
-        android:ellipsize="marquee"
-        android:marqueeRepeatLimit ="marquee_forever"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:scrollHorizontally="true"
-       />
     <!--
     <TextView
         android:layout_width="wrap_content"
@@ -149,7 +128,7 @@
         android:layout_toRightOf="@+id/details_ETA"
         android:text="open time"
         android:layout_marginLeft="10dp"
-        android:textSize="15sp"
+        android:textSize="20sp"
         android:textColor="@android:color/white"
         android:layout_marginRight="10dp"
         android:layout_alignBottom="@+id/details_ETA"
@@ -162,17 +141,17 @@
         android:focusableInTouchMode="true"
         android:scrollHorizontally="true"/>
 
-    <FrameLayout
-        android:id="@+id/details_map_reviews_frame"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/comments_RV"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/details_ETA"
         android:layout_above="@+id/details_interact_layout"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="15dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp">
 
-    </FrameLayout>
+    </android.support.v7.widget.RecyclerView>
 
     <LinearLayout
         android:id="@+id/details_interact_layout"
@@ -228,7 +207,7 @@
         android:layout_height="wrap_content"
         android:text=""
         android:textColor="@android:color/white"
-        android:textSize="15sp"
+        android:textSize="20sp"
         android:layout_below="@+id/details_address"
         android:layout_alignLeft="@+id/details_address"
         android:layout_alignStart="@+id/details_address" />
@@ -249,6 +228,7 @@
         android:background="#25ffffff"
         android:layout_above="@+id/relativeLayout"
         android:layout_alignParentLeft="true"
+        android:scaleY="1"
         android:layout_alignParentStart="true">
 
         <TextView
@@ -268,6 +248,26 @@
             android:layout_gravity="center" />
 
     </FrameLayout>
+
+    <TextView
+        android:layout_marginTop="10dp"
+        android:id="@+id/details_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="botevgradsko shose 11"
+        android:textSize="25sp"
+        android:textColor="@android:color/white"
+        android:layout_marginLeft="14dp"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit ="marquee_forever"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:scrollHorizontally="true"
+        android:layout_below="@+id/details_photo_scroll_view"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="14dp" />
 
 
 </RelativeLayout>
