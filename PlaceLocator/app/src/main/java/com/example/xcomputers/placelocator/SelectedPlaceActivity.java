@@ -45,6 +45,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
     private HorizontalScrollView hsv;
     private Button call;
     private Button website;
+    private Button map;
     private RatingBar myRB;
     private ProperRatingBar cashRB;
     private TextView myRatingBarTV;
@@ -103,13 +104,14 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
 
 
-      //  new ImageDownloaderTask(new ImageView(SelectedPlaceActivity.this)).execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=CnRtAAAATLZNl354RwP_9UKbQ_5Psy40texXePv4oAlgP4qNEkdIrkyse7rPXYGd9D_Uj1rVsQdWT4oRz4QrYAJNpFX7rzqqMlZw2h2E2y5IKMUZ7ouD_SlcHxYq1yL4KbKUv3qtWgTK0A6QbGh87GB3sscrHRIQiG2RrmU_jF4tENr9wGS_YxoUSSDrYjWmrNfeEHSGSc3FyhNLlBU&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
+        //  new ImageDownloaderTask(new ImageView(SelectedPlaceActivity.this)).execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=CnRtAAAATLZNl354RwP_9UKbQ_5Psy40texXePv4oAlgP4qNEkdIrkyse7rPXYGd9D_Uj1rVsQdWT4oRz4QrYAJNpFX7rzqqMlZw2h2E2y5IKMUZ7ouD_SlcHxYq1yL4KbKUv3qtWgTK0A6QbGh87GB3sscrHRIQiG2RrmU_jF4tENr9wGS_YxoUSSDrYjWmrNfeEHSGSc3FyhNLlBU&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
 
 
 
 
 
         call = (Button) findViewById(R.id.details_dial_button);
+        map = (Button) findViewById(R.id.details_reserve_button);
         website = (Button) findViewById(R.id.details_website_url);
         myRB = (RatingBar) findViewById(R.id.details_rating_rb);
         myRatingBarTV = (TextView) findViewById(R.id.details_rating_tv);
@@ -484,6 +486,15 @@ public class SelectedPlaceActivity extends AppCompatActivity {
                 }
             }
         });
+        map.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SelectedPlaceActivity.this,SelectedPlaceMapsActivity.class);
+                intent.putExtra("placeLocation",placeLocation);
+                intent.putExtra("name",nameScrollTextView.getText().toString());
+                startActivity(intent);
+            }
+        });
 
     }
 
@@ -506,7 +517,6 @@ public class SelectedPlaceActivity extends AppCompatActivity {
                 loadingImage.setImageBitmap(loadingImageBM);
                 loadingImage.setScaleType(ImageView.ScaleType.FIT_XY);
                 MyViewFlipper.addView(loadingImage);
-
             }
         }
 
@@ -524,23 +534,22 @@ public class SelectedPlaceActivity extends AppCompatActivity {
                 bitmap = null;
             }
 
-           // if (imageViewReference != null) {
-               // ImageView imageView = imageViewReference.get();
-               // if (imageView != null) {
-                   // if (bitmap != null) {
+//             if (imageViewReference != null) {
+//                 ImageView imageView = imageViewReference.get();
+//                 if (imageView != null) {
+//                        if (bitmap != null) {
                         images.add(bitmap);
                         ImageView newImageView = new ImageView(SelectedPlaceActivity.this);
-                       // newImageView.setLayoutParams(new FrameLayout.LayoutParams(MyViewFlipper.getWidth(),MyViewFlipper.getHeight()));
                         MyViewFlipper.addView(newImageView);
                         Log.e("IMAGESADD",bitmap.toString());
                         Log.e("IMAGES1",images.size()+ "");
-                  //  } else {
-                      //  Toast.makeText(SelectedPlaceActivity.this, "NO PHOTOS", Toast.LENGTH_SHORT).show();
+                  //        } else {
+                            // Toast.makeText(SelectedPlaceActivity.this, "NO PHOTOS", Toast.LENGTH_SHORT).show();
 
-                   // }
-             //   }
+                 //        }
+                //  }
 
-           // }
+           //  }
 
 
 
@@ -548,15 +557,15 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             Animation animationFlipOut = AnimationUtils.loadAnimation(SelectedPlaceActivity.this, R.anim.flipout);
             MyViewFlipper.setInAnimation(animationFlipIn);
             MyViewFlipper.setOutAnimation(animationFlipOut);
-           // MyViewFlipper.set
-            MyViewFlipper.setFlipInterval(2000);
+            // MyViewFlipper.set
+            MyViewFlipper.setFlipInterval(2200);
 
 
             Log.e("IMAGES",images.size()+ "");
 
             for (int i = 0; i < images.size(); i++) {
                 Log.e("IMAGESCOUNTTT", ""+ MyViewFlipper.getChildCount());
-               // ImageView newImageView = );
+                // ImageView newImageView = );
                 ((ImageView) MyViewFlipper.getChildAt(i)).setImageBitmap(images.get(i));
                 ((ImageView) MyViewFlipper.getChildAt(i)).setScaleType(ImageView.ScaleType.FIT_XY);
                 //MyViewFlipper.addView(newImageView);
@@ -570,6 +579,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             if(images.size() <= 1) {
                 MyViewFlipper.stopFlipping();
             }
+
 
 
 

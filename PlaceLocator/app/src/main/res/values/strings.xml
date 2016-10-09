@@ -65,4 +65,5 @@
     <string name="voice_recognition_button_text">Talk to me</string>
     <string name="distance_slider_text">Select search distance</string>
     <string name="distance_KM_text">KM</string>
+    <string name="title_activity_selected_place_maps">Map</string>
 </resources>
