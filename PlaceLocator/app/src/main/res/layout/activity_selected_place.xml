@@ -246,7 +246,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:background="#00ffffff"
+        android:background="#25ffffff"
         android:layout_above="@+id/relativeLayout"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
