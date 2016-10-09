@@ -82,7 +82,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private SeekBar distanceSeekBar;
     private ProgressDialog mProgressDialog;
     private Location placeLocation;
-
+    private String distance;
+    private String duration;
     private String myRadiusString;
     private double myRadiusDouble;
     public static GoogleApiClient client;
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int VOICE_RECOGNITION_REQUEST = 200;
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
     private Dialog alertDialog;
+    private String autocompletePlaceID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,17 +194,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onPlaceSelected(Place place) {
                 //TODO Intent to more info screen with place information
-                String placeID = place.getId();
-                Intent intent = new Intent(MainActivity.this, SelectedPlaceActivity.class);
-                intent.putExtra("json", placeID);
-                intent.putExtra("lastLocation", lastLocation);
-                LatLng latLng = place.getLatLng();
-                Location placeLocation = new Location("");
-                placeLocation.setLongitude(latLng.longitude);
-                placeLocation.setLatitude(latLng.latitude);
-                intent.putExtra("placeLocation", placeLocation);
-                Log.i("TAG", "Place: " + place.getName());
-                startActivity(intent);
+                autocompletePlaceID = place.getId();
+                new RequestTask().execute("https://maps.googleapis.com/maps/api/place/details/json?placeid=" + autocompletePlaceID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
             }
 
             @Override
@@ -399,12 +392,41 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             try {
                 json = new JSONObject(response);
-                JSONArray array = json.getJSONArray("results");
-                Log.e("TAG", "JSON ARRAY SIZE: " + array.length());
-                for (int i = 0; i < array.length(); i++) {
-                  JSONObject  myobj = array.getJSONObject(i);
-                    String placeID = (String) myobj.get("place_id");
-                    address = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=" + String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()) + "&destinations=place_id:" + placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4";
+                //checking if the AsyncTask is executed with a click from the category recyclerView or from the autocomplete fragment
+                if(json.has("results")) {
+                    JSONArray array = json.getJSONArray("results");
+                    Log.e("TAG", "JSON ARRAY SIZE: " + array.length());
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject myobj = array.getJSONObject(i);
+                        String placeID = (String) myobj.get("place_id");
+                        address = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=" + String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()) + "&destinations=place_id:" + placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4";
+                        URL url = new URL(address);
+                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        connection.setRequestMethod("GET");
+                        connection.connect();
+                        String distanceResponse = "";
+                        Scanner sc = new Scanner(connection.getInputStream());
+                        while (sc.hasNextLine()) {
+                            distanceResponse += sc.nextLine();
+                        }
+                        Log.e("DISTACE RESPONCE", distanceResponse);
+                        JSONObject distanceJson = new JSONObject(distanceResponse);
+                        JSONObject distanceRows = (JSONObject) distanceJson.getJSONArray("rows").get(0);
+                        JSONArray distanceElements = (JSONArray) distanceRows.getJSONArray("elements");
+                        JSONObject distanceAndDuration = distanceElements.getJSONObject(0); // distance and duration
+                        JSONObject distanceObj = distanceAndDuration.getJSONObject("distance");
+                        JSONObject durationObj = distanceAndDuration.getJSONObject("duration");
+
+                        JSONObject geometry = myobj.getJSONObject("geometry");
+                        geometry.put("distance", distanceObj);
+
+                        geometry.put("duration", durationObj);
+
+                    }
+                }
+                if(json.has("result")){
+                    Log.e("jsonResult", json.toString());
+                    address = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=" + String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()) + "&destinations=place_id:" + autocompletePlaceID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4";
                     URL url = new URL(address);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
@@ -414,18 +436,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     while (sc.hasNextLine()) {
                         distanceResponse += sc.nextLine();
                     }
-                    Log.e("DISTACE RESPONCE", distanceResponse);
                     JSONObject distanceJson = new JSONObject(distanceResponse);
+                    Log.e("autocomplete distance", distanceResponse);
                     JSONObject distanceRows = (JSONObject) distanceJson.getJSONArray("rows").get(0);
                     JSONArray distanceElements = (JSONArray) distanceRows.getJSONArray("elements");
                     JSONObject distanceAndDuration = distanceElements.getJSONObject(0); // distance and duration
                     JSONObject distanceObj = distanceAndDuration.getJSONObject("distance");
                     JSONObject durationObj = distanceAndDuration.getJSONObject("duration");
 
-                    JSONObject geometry = myobj.getJSONObject("geometry");
-                    geometry.put("distance",distanceObj);
 
-                    geometry.put("duration",durationObj);
+                    JSONObject geometry = json.getJSONObject("result").getJSONObject("geometry");
+                    geometry.put("distance", distanceObj);
+                    geometry.put("duration", durationObj);
 
                 }
             } catch (JSONException e) {
@@ -441,6 +463,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             return response;
         }
 
+        
+
             @Override
         protected void onPreExecute() {
             showProgressDialog();
@@ -448,16 +472,39 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         @Override
         protected void onPostExecute(String s) {
+            JSONObject jobj = null;
+            Intent intent = null;
+            try {
+                jobj = new JSONObject(s);
+                if(jobj.has("result")) {
+                    intent = new Intent(MainActivity.this, SelectedPlaceActivity.class);
+                    JSONObject resultObj = jobj.getJSONObject("result");
+                    placeLocation = new Location("");
+                    double placeLatitude = (double) resultObj.getJSONObject("geometry").getJSONObject("location").get("lat");
+                    double placeLongtitude = (double) resultObj.getJSONObject("geometry").getJSONObject("location").get("lng");
+                    placeLocation.setLatitude(placeLatitude);
+                    placeLocation.setLongitude(placeLongtitude);
+                    distance = (String) resultObj.getJSONObject("geometry").getJSONObject("distance").get("text");
+                    duration = (String) resultObj.getJSONObject("geometry").getJSONObject("duration").get("text");
+                    intent.putExtra("placeLocation", placeLocation);
+                    Log.e("SELECTED PLACE", placeLocation.toString());
+                    intent.putExtra("distance", distance);
+                    intent.putExtra("duration", duration);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-                Intent intent = new Intent(MainActivity.this, SearchResultsActivity.class);
+
+            if(jobj.has("results")) {
+                intent = new Intent(MainActivity.this, SearchResultsActivity.class);
+            }
                 intent.putExtra("json", s);
                 intent.putExtra("lastLocation", lastLocation);
                 startActivity(intent);
                 hideProgressDialog();
+            }
 
-            Log.e("TAG", s);
-
-        }
 
     }
 
