@@ -69,8 +69,8 @@ public class SearchResultsActivity extends AppCompatActivity {
                 placeLocation.setLongitude(placeLongtitude);
 
                 Log.e("TAG", getIntent().getStringExtra("json"));
-                String distance = (String) myobj.getJSONObject("geometry").getJSONObject("distance").get("text");
-                String duration = (String) myobj.getJSONObject("geometry").getJSONObject("duration").get("text");
+                distance = (String) myobj.getJSONObject("geometry").getJSONObject("distance").get("text");
+                duration = (String) myobj.getJSONObject("geometry").getJSONObject("duration").get("text");
                 Log.e("TAG", duration);
                 if (!myobj.has("rating")) {
 
@@ -167,7 +167,7 @@ public class SearchResultsActivity extends AppCompatActivity {
         }
     }
 
-    private SearchResultsRecyclerViewAdapter.onResultClickListener createClickListener() {
+    protected SearchResultsRecyclerViewAdapter.onResultClickListener createClickListener() {
         return new SearchResultsRecyclerViewAdapter.onResultClickListener() {
             @Override
             public void onResultClicked(View view, int position) {
