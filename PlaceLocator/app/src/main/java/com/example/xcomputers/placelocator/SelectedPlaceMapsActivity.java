@@ -43,6 +43,6 @@ public class SelectedPlaceMapsActivity extends FragmentActivity implements OnMap
         LatLng place = new LatLng(location.getLatitude(), location.getLongitude());
         mMap.addMarker(new MarkerOptions().position(place).title(""+ getIntent().getStringExtra("name")));
         mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(place , 14.0f) );
-        
+
     }
 }

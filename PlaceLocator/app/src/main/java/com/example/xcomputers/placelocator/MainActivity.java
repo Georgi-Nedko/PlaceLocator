@@ -127,48 +127,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     .addApi(LocationServices.API)
                     .build();
         }
-        LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(client, builder.build());
-
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(LocationSettingsResult locationSettingsResult) {
-
-                final Status status = locationSettingsResult.getStatus();
-                final LocationSettingsStates LS_state = locationSettingsResult.getLocationSettingsStates();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        // All location settings are satisfied. The client can initialize location
-                        // requests here.
-
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        // Location settings are not satisfied. But could be fixed by showing the user
-                        // a dialog.
-                        try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
-
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        // Location settings are not satisfied. However, we have no way to fix the
-                        // settings so we won't show the dialog.
-
-                        break;
-                }
-            }
-        });
+        requestLocation();
 
         voiceRecognitionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -217,15 +176,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         adapter.setOnItemClickListener(new CategoriesRecyclerViewAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(isLocationOn){
-                    onConnected(null);
-                }
-                if(lastLocation != null){
-                    executeRequest(position, list);
-
+                if(!isLocationOn){
+                    requestLocation();
+                    getLocation();
                 }
                 else{
-                    Toast.makeText(MainActivity.this, "Please turn on your location services", Toast.LENGTH_SHORT).show();
+                    getLocation();
+                }
+                if(isConnectingToInternet()) {
+                    if (lastLocation != null) {
+                        executeRequest(position, list);
+
+                    } else {
+                        Toast.makeText(MainActivity.this, "Please turn on your location services", Toast.LENGTH_SHORT).show();
+                        isLocationOn = false;
+                    }
+                }
+                else{
+                    promptUserToTurnOnWifi();
                 }
             }
         });
@@ -257,7 +225,54 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         });
     }
+    private void requestLocation(){
+        showProgressDialog(true);
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(client, builder.build());
+
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult locationSettingsResult) {
+
+                final Status status = locationSettingsResult.getStatus();
+                final LocationSettingsStates LS_state = locationSettingsResult.getLocationSettingsStates();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        // All location settings are satisfied. The client can initialize location
+                        // requests here.
+                        getLocation();
+                        hideProgressDialog();
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the user
+                        // a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+                        Toast.makeText(MainActivity.this, "You can't use this app unless you have your location services turned on", Toast.LENGTH_SHORT).show();
+                        hideProgressDialog();
+                        break;
+                }
+
+            }
+        });
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == VOICE_RECOGNITION_REQUEST){
@@ -273,14 +288,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 switch (resultCode) {
                     case Activity.RESULT_OK:
                         isLocationOn = true;
-                        onConnected(null);
+                        getLocation();
                         hideProgressDialog();
                         break;
                     case Activity.RESULT_CANCELED:
-                        // The user was asked to change settings, but chose not to
+                        hideProgressDialog();
 
                         break;
                     default:
+                        hideProgressDialog();
                         break;
                 }
                 break;
@@ -358,22 +374,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            return;
-        }
-        lastLocation = LocationServices.FusedLocationApi.getLastLocation(client);
-        if(lastLocation != null) {
-            latitude = String.valueOf(lastLocation.getLatitude());
-            longtitude = String.valueOf(lastLocation.getLongitude());
-            autocompleteFragment.setBoundsBias(toBounds(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), myRadiusDouble));
-        }
-        else{
-           showProgressDialog(true);
-        }
+        getLocation();
     }
 
-
+    private void getLocation(){
+         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+             return;
+         }
+            lastLocation = LocationServices.FusedLocationApi.getLastLocation(client);
+            if(lastLocation != null) {
+             latitude = String.valueOf(lastLocation.getLatitude());
+             longtitude = String.valueOf(lastLocation.getLongitude());
+             autocompleteFragment.setBoundsBias(toBounds(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), myRadiusDouble));
+            }
+        }
     @Override
     public void onConnectionSuspended(int i) {
 
@@ -522,9 +536,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
     }
-
-    @Override
-    protected void onStart() {
+    private void promptUserToTurnOnWifi(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         if(!isConnectingToInternet()){
             builder.setTitle("Internet Services Not Active");
@@ -540,6 +552,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             alertDialog.setCanceledOnTouchOutside(false);
             alertDialog.show();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        promptUserToTurnOnWifi();
         client.connect();
         super.onStart();
     }

@@ -125,7 +125,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             finish();
             hideProgressDialog();
         } else {
-
+            hideProgressDialog();
         }
     }
 
@@ -163,6 +163,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     protected void onStop() {
         mGoogleApiClient.disconnect();
+        hideProgressDialog();
         super.onStop();
 
     }
@@ -193,7 +194,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         hideProgressDialog();
-    }
+}
 
     @Override
     public void onConnectionSuspended(int i) {
