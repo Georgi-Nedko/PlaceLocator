@@ -6,7 +6,7 @@
     <translate
         android:fromXDelta="0%"
         android:toXDelta="100%"
-        android:duration="1000"
+        android:duration="1500"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </set>

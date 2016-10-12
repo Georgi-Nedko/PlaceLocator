@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
 
+
     tools:context="com.example.xcomputers.placelocator.SelectedPlaceActivity">
 
     <!-- TODO: Update blank fragment layout -->
@@ -70,32 +71,121 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_below="@+id/details_photo_scroll_view"
         android:layout_alignParentBottom="true"
-
-        android:scaleY="-1"
+        android:scaleY="1"
         android:id="@+id/relativeLayout">
         <!-- android:background="@drawable/black_gradient"-->
+        <TextView
+            android:layout_marginTop="10dp"
+            android:id="@+id/details_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="botevgradsko shose 11"
+            android:textSize="25sp"
+            android:textColor="@android:color/white"
+            android:layout_marginLeft="14dp"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit ="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
+            android:layout_marginStart="12dp" />
+        <TextView
+            android:id="@+id/details_open"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/details_ETA"
+            android:text="open time"
+            android:layout_marginLeft="10dp"
+            android:textSize="20sp"
+            android:textColor="@android:color/white"
+            android:layout_marginRight="10dp"
+            android:layout_alignBottom="@+id/details_ETA"
+            android:layout_alignParentRight="true"
+            android:singleLine="true"
+            android:freezesText="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit ="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"/>
+
+        <TextView
+            android:id="@+id/details_ETA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:layout_below="@+id/details_address"
+            android:layout_alignLeft="@+id/details_address"
+            android:layout_alignStart="@+id/details_address" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/comments_RV"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/details_ETA"
+            android:layout_above="@+id/details_interact_layout"
+            android:layout_marginTop="15dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
+
+        </android.support.v7.widget.RecyclerView>
+        <LinearLayout
+            android:id="@+id/details_interact_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:paddingBottom="5dp"
+            android:layout_marginBottom="10dp">
+
+            <Button
+                android:id="@+id/details_website_url"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="visit website"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:background="@color/transparent"
+                android:drawableBottom="@drawable/website_visit_us"
+
+
+                />
+
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:text="Call us!"
+                android:drawableBottom="@drawable/call_us_mini_icon"
+                android:background="@color/transparent"
+                android:id="@+id/details_dial_button" />
+
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:text="See on map"
+                android:background="@color/transparent"
+                android:drawableBottom="@drawable/gmaps"
+                android:id="@+id/details_reserve_button" />
+        </LinearLayout>
+
+
+
 
     </RelativeLayout>
-    <TextView
-        android:layout_marginTop="10dp"
-        android:id="@+id/details_address"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="botevgradsko shose 11"
-        android:textSize="25sp"
-        android:textColor="@android:color/white"
-        android:layout_marginLeft="14dp"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:marqueeRepeatLimit ="marquee_forever"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:scrollHorizontally="true"
-        android:layout_below="@+id/details_photo_scroll_view"
-        android:layout_marginStart="12dp" />
 
 
     <!--
@@ -114,114 +204,19 @@
         android:layout_alignParentRight="true" />
         -->
 
-    <TextView
-        android:id="@+id/details_open"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/details_ETA"
-        android:text="open time"
-        android:layout_marginLeft="10dp"
-        android:textSize="20sp"
-        android:textColor="@android:color/white"
-        android:layout_marginRight="10dp"
-        android:layout_alignBottom="@+id/details_ETA"
-        android:layout_alignParentRight="true"
-        android:singleLine="true"
-        android:freezesText="true"
-        android:ellipsize="marquee"
-        android:marqueeRepeatLimit ="marquee_forever"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:scrollHorizontally="true"/>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/comments_RV"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/details_ETA"
-        android:layout_above="@+id/details_interact_layout"
-        android:layout_marginTop="15dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp">
-
-    </android.support.v7.widget.RecyclerView>
-
-    <LinearLayout
-        android:id="@+id/details_interact_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:padding="5dp">
-
-        <Button
-            android:id="@+id/details_website_url"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="visit website"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:background="@color/transparent"
-            android:drawableBottom="@drawable/website_visit_us"
 
 
-            />
 
 
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:text="Call us!"
-            android:drawableBottom="@drawable/call_us_mini_icon"
-            android:background="@color/transparent"
-            android:id="@+id/details_dial_button" />
 
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:text="See on map"
-            android:background="@color/transparent"
-            android:drawableBottom="@drawable/gmaps"
-            android:id="@+id/details_reserve_button" />
-    </LinearLayout>
-
-
-    <TextView
-        android:id="@+id/details_ETA"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textColor="@android:color/white"
-        android:textSize="20sp"
-        android:layout_below="@+id/details_address"
-        android:layout_alignLeft="@+id/details_address"
-        android:layout_alignStart="@+id/details_address" />
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="#00ffffff"
-        android:scaleY="-1"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-    </FrameLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:background="#25ffffff"
+        android:scaleY="1"
         android:layout_above="@+id/relativeLayout"
         android:layout_alignParentLeft="true"
-        android:scaleY="1"
         android:layout_alignParentStart="true">
 
         <TextView
@@ -242,6 +237,15 @@
 
     </FrameLayout>
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#00ffffff"
+        android:scaleY="-1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+    </FrameLayout>
 
 
 </RelativeLayout>
