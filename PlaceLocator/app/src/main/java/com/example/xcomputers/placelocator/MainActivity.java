@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
@@ -80,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private TextView selectDistanceTV;
     private TextView distanceKMTV;
     private SeekBar distanceSeekBar;
-    private ProgressDialog mProgressDialog;
+    private ProgressDialog LocationDialog;
+    private ProgressDialog requestLoadingDialog;
     private Location placeLocation;
     private String distance;
     private String duration;
@@ -176,13 +176,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         adapter.setOnItemClickListener(new CategoriesRecyclerViewAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(!isLocationOn){
+                showLocationProgressDialog();
                     requestLocation();
                     getLocation();
-                }
-                else{
-                    getLocation();
-                }
+
                 if(isConnectingToInternet()) {
                     if (lastLocation != null) {
                         executeRequest(position, list);
@@ -226,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
     }
     private void requestLocation(){
-        showProgressDialog(true);
+        showLocationProgressDialog();
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(5000);
@@ -248,7 +245,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         // All location settings are satisfied. The client can initialize location
                         // requests here.
                         getLocation();
-                        hideProgressDialog();
+                        isLocationOn = true;
+                        hideLocationProgressDialog();
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         // Location settings are not satisfied. But could be fixed by showing the user
@@ -257,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             // Show the dialog by calling startResolutionForResult(),
                             // and check the result in onActivityResult().
                             status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
-
+                            hideLocationProgressDialog();
                         } catch (IntentSender.SendIntentException e) {
                             // Ignore the error.
                         }
@@ -266,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         // Location settings are not satisfied. However, we have no way to fix the
                         // settings so we won't show the dialog.
                         Toast.makeText(MainActivity.this, "You can't use this app unless you have your location services turned on", Toast.LENGTH_SHORT).show();
-                        hideProgressDialog();
+                        hideLocationProgressDialog();
                         break;
                 }
 
@@ -289,14 +287,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     case Activity.RESULT_OK:
                         isLocationOn = true;
                         getLocation();
-                        hideProgressDialog();
+                        hideLocationProgressDialog();
                         break;
                     case Activity.RESULT_CANCELED:
-                        hideProgressDialog();
+                        hideLocationProgressDialog();
 
                         break;
                     default:
-                        hideProgressDialog();
+                        hideLocationProgressDialog();
                         break;
                 }
                 break;
@@ -304,31 +302,47 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-    private void showProgressDialog(boolean location) {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            if(location){
-                mProgressDialog.setMessage("Obtaining Location...");
-            }
-            else{
-                mProgressDialog.setMessage("Loading...");
-            }
-            mProgressDialog.setIndeterminate(true);
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.setCanceledOnTouchOutside(false);
+    private void showLocationProgressDialog() {
+        if (LocationDialog == null) {
+            LocationDialog = new ProgressDialog(this);
+            LocationDialog.setMessage("Obtaining Location...");
+            LocationDialog.setIndeterminate(true);
+            LocationDialog.setCancelable(false);
+            LocationDialog.setCanceledOnTouchOutside(false);
         }
 
-        mProgressDialog.show();
+        LocationDialog.show();
     }
 
-    private void hideProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.hide();
+    private void hideLocationProgressDialog() {
+        if (LocationDialog != null && LocationDialog.isShowing()) {
+            LocationDialog.hide();
         }
     }
+
+    private void showRequestLoadingDialog() {
+        if (requestLoadingDialog == null) {
+            requestLoadingDialog = new ProgressDialog(this);
+            requestLoadingDialog.setMessage("Loading...");
+            requestLoadingDialog.setIndeterminate(true);
+            requestLoadingDialog.setCancelable(false);
+            requestLoadingDialog.setCanceledOnTouchOutside(false);
+        }
+
+        requestLoadingDialog.show();
+    }
+
+    private void hideRequestLoadingDialog() {
+        if (requestLoadingDialog != null && requestLoadingDialog.isShowing()) {
+            requestLoadingDialog.hide();
+        }
+    }
+
+
 
     private void executeRequest(int position, List<Category> list){
         String type = list.get(position).getType();
+        showRequestLoadingDialog();
         new RequestTask().execute("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longtitude + "&radius=" + myRadiusString + "&type=" + type + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
 
     }
@@ -496,7 +510,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             @Override
         protected void onPreExecute() {
-            showProgressDialog(false);
+            showRequestLoadingDialog();
         }
 
         @Override
@@ -531,7 +545,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 intent.putExtra("json", s);
                 intent.putExtra("lastLocation", lastLocation);
                 startActivity(intent);
-                hideProgressDialog();
+                hideRequestLoadingDialog();
             }
 
 
