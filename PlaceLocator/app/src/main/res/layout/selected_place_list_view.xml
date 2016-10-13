@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <LinearLayout
         android:layout_width="match_parent"
@@ -8,17 +9,17 @@
         android:layout_weight="1">
         <TextView
             android:layout_width="0dp"
-            android:layout_weight="3"
+            android:layout_weight="51"
             android:textStyle="bold"
             android:textColor="@android:color/white"
-            android:textSize="15sp"
+            android:textSize="22sp"
             android:text="dsadsadsasda"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/nameOfCommentatorTV"/>
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="4"
             android:gravity="end"
             android:textSize="13dp"
             android:textColor="@android:color/white"
@@ -31,14 +32,13 @@
             android:isIndicator="true"
             android:numStars="5"
             android:stepSize="0.1"
-            />
+             />
 
     </LinearLayout>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
-        android:textSize="15sp"
+        android:textSize="16sp"
         android:text="dsasdadsadasdasdsadd"
         android:textColor="@android:color/white"
         android:id="@+id/descriptionTV"/>

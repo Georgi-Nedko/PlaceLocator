@@ -12,8 +12,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -33,7 +35,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
     HorizontalScrollView imagesHSV;
     LinkedList<Bitmap> images;
     int counterImages = 0;
-    int counter = 1;
+    int counterChild = 0;
     int counterEven = 3;
     int counterOdd = 4;
     private ViewFlipper MyViewFlipper;
@@ -78,14 +79,20 @@ public class SelectedPlaceActivity extends AppCompatActivity {
     Bitmap noImageBM;
     ImageView loadingImage;
     private ArrayList<Commentator> commentators;
+    int height;
+    int width;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (android.os.Build.VERSION.SDK_INT >= 11) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        }
         setContentView(R.layout.activity_selected_place);
+
         loadingImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(),R.drawable.image_coming_soon);
-        noImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(),R.drawable.no_images_available);
+        noImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(),R.drawable.no_photo_available);
         //TODO make xml in scroll view
         //TODO change the horizontal scroll images
         //TODO make the recylcer view for comments
@@ -138,6 +145,22 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         openTimeTV.setSelected(true);
 
 
+        Animation animationFlipIn = AnimationUtils.loadAnimation(SelectedPlaceActivity.this, R.anim.flipin);
+        Animation animationFlipOut = AnimationUtils.loadAnimation(SelectedPlaceActivity.this, R.anim.flipout);
+        MyViewFlipper.setInAnimation(animationFlipIn);
+        MyViewFlipper.setOutAnimation(animationFlipOut);
+        MyViewFlipper.setFlipInterval(2400);
+
+
+
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        height = displaymetrics.heightPixels;
+        width = displaymetrics.widthPixels;
+        MyViewFlipper.getLayoutParams().height = (int) (height/2.4);
+        MyViewFlipper.getLayoutParams().width = width;
+
+
 
 
         try {
@@ -148,20 +171,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             if(!jObjectResult.isNull("reviews")) {
                 addAllCommentators(jObjectResult, commentators);
             }
-            if(!jObjectResult.isNull("photos")) {
-                JSONArray photos = (JSONArray) jObjectResult.get("photos");
-                for(int i = 0; i < photos.length();i++){
-                    Log.e("PHOTOSSSS", photos.toString());
-                    Log.e("photoreference","" + photos.getJSONObject(i).getString("photo_reference"));
-                    new ImageDownloaderTask(new ImageView(SelectedPlaceActivity.this)).execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference="+ photos.getJSONObject(i).getString("photo_reference") + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
-                }
-            }else{
-                    images.add(noImageBM);
-                    ImageView noImage = new ImageView(SelectedPlaceActivity.this);
-                    noImage.setImageBitmap(noImageBM);
-                    noImage.setScaleType(ImageView.ScaleType.FIT_XY);
-                    MyViewFlipper.addView(noImage);
-                }
+
             if (jObjectResult.isNull("formatted_phone_number")) {
                  phoneTV = "no phone";
             }else {
@@ -186,6 +196,21 @@ public class SelectedPlaceActivity extends AppCompatActivity {
              }
             if (!jObjectResult.isNull("website")) {
                 uri = jObjectResult.getString("website");
+            }
+            if(!jObjectResult.isNull("photos")) {
+                JSONArray photos = (JSONArray) jObjectResult.get("photos");
+                for(int i = 0; i < photos.length();i++){
+                    Log.e("PHOTOSSSS", photos.toString());
+                    Log.e("photoreference","" + photos.getJSONObject(i).getString("photo_reference"));
+                    new ImageDownloaderTask().execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference="+ photos.getJSONObject(i).getString("photo_reference") + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
+
+                }
+            }else{
+                images.add(noImageBM);
+                ImageView noImage = new ImageView(SelectedPlaceActivity.this);
+                noImage.setImageBitmap(noImageBM);
+                noImage.setScaleType(ImageView.ScaleType.FIT_XY);
+                MyViewFlipper.addView(noImage);
             }
 //        }
 //                        }
@@ -505,15 +530,11 @@ public class SelectedPlaceActivity extends AppCompatActivity {
     ////////////////////////////////////////////////////////////////////
 
     class ImageDownloaderTask extends AsyncTask<String, Void, Bitmap> {
-        private final WeakReference<ImageView> imageViewReference;
 
-        public ImageDownloaderTask(ImageView imageView) {
-            imageViewReference = new WeakReference<ImageView>(imageView);
-        }
 
         @Override
         protected void onPreExecute() {
-            if(images.size()== 0){
+            if(images.size() == 0){
                 images.add(loadingImageBM);
                 loadingImage = new ImageView(SelectedPlaceActivity.this);
                 loadingImage.setImageBitmap(loadingImageBM);
@@ -553,16 +574,6 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
            //  }
 
-
-
-            Animation animationFlipIn = AnimationUtils.loadAnimation(SelectedPlaceActivity.this, R.anim.flipin);
-            Animation animationFlipOut = AnimationUtils.loadAnimation(SelectedPlaceActivity.this, R.anim.flipout);
-            MyViewFlipper.setInAnimation(animationFlipIn);
-            MyViewFlipper.setOutAnimation(animationFlipOut);
-            // MyViewFlipper.set
-            MyViewFlipper.setFlipInterval(2400);
-
-
             Log.e("IMAGES",images.size()+ "");
 
             for (int i = 0; i < images.size(); i++) {
@@ -572,6 +583,9 @@ public class SelectedPlaceActivity extends AppCompatActivity {
                 ((ImageView) MyViewFlipper.getChildAt(i)).setScaleType(ImageView.ScaleType.FIT_XY);
                 //MyViewFlipper.addView(newImageView);
             }
+//            ((ImageView) MyViewFlipper.getChildAt(counterChild)).setImageBitmap(bitmap);
+//            ((ImageView) MyViewFlipper.getChildAt(counterChild)).setScaleType(ImageView.ScaleType.FIT_XY);
+           // counterChild++;
             if(images.contains(loadingImageBM)){
                 images.removeFirst();
                 MyViewFlipper.removeViewAt(0);
