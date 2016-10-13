@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/CenturyGothic.ttf");
+        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf");
 
         selectDistanceTV = (TextView) findViewById(R.id.distance_left_TV);
         distanceKMTV = (TextView) findViewById(R.id.distance_right_TV);
@@ -413,11 +413,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     class RequestTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            String address = params[0];
-            String response = "";
+        private String getRequest(String address){
+            StringBuilder response = new StringBuilder();
             try {
                 URL url = new URL(address);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -426,12 +423,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 int status = connection.getResponseCode();
                 Scanner sc = new Scanner(connection.getInputStream());
                 while (sc.hasNextLine()) {
-                    response += sc.nextLine();
+                    response.append(sc.nextLine());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return response.toString();
+        }
 
+        @Override
+        protected String doInBackground(String... params) {
+            String address = params[0];
+            String response = getRequest(address);
             JSONObject json = null;
 
             try {
@@ -444,15 +447,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         JSONObject myobj = array.getJSONObject(i);
                         String placeID = (String) myobj.get("place_id");
                         address = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=" + String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()) + "&destinations=place_id:" + placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4";
-                        URL url = new URL(address);
-                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                        connection.setRequestMethod("GET");
-                        connection.connect();
-                        String distanceResponse = "";
-                        Scanner sc = new Scanner(connection.getInputStream());
-                        while (sc.hasNextLine()) {
-                            distanceResponse += sc.nextLine();
-                        }
+                        String distanceResponse = getRequest(address);
+
                         Log.e("DISTACE RESPONCE", distanceResponse);
                         JSONObject distanceJson = new JSONObject(distanceResponse);
                         JSONObject distanceRows = (JSONObject) distanceJson.getJSONArray("rows").get(0);
@@ -470,19 +466,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if(json.has("result")){
                     Log.e("jsonResult", json.toString());
                     address = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=" + String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()) + "&destinations=place_id:" + autocompletePlaceID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4";
-                    URL url = new URL(address);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.connect();
-                    String distanceResponse = "";
-                    Scanner sc = new Scanner(connection.getInputStream());
-                    while (sc.hasNextLine()) {
-                        distanceResponse += sc.nextLine();
-                    }
+                    String distanceResponse = getRequest(address);
                     JSONObject distanceJson = new JSONObject(distanceResponse);
                     Log.e("autocomplete distance", distanceResponse);
                     JSONObject distanceRows = (JSONObject) distanceJson.getJSONArray("rows").get(0);
-                    JSONArray distanceElements = (JSONArray) distanceRows.getJSONArray("elements");
+                    JSONArray distanceElements = distanceRows.getJSONArray("elements");
                     JSONObject distanceAndDuration = distanceElements.getJSONObject(0); // distance and duration
                     JSONObject distanceObj = distanceAndDuration.getJSONObject("distance");
                     JSONObject durationObj = distanceAndDuration.getJSONObject("duration");
@@ -494,12 +482,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
                 e.printStackTrace();
             }
             response = json.toString();

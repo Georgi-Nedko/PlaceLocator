@@ -1,6 +1,7 @@
 package com.example.xcomputers.placelocator;
 
 import android.app.Activity;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,11 +23,15 @@ public class SearchResultsRecyclerViewAdapter extends RecyclerView.Adapter<Searc
     private List<MyPlace> places;
     private Activity activity;
     onResultClickListener resultsItemClickListener;
+    private Typeface custom_font;
+    private Typeface custom_font_bold;
 
     public SearchResultsRecyclerViewAdapter(Activity activity, List<MyPlace> places) {
         this.places = places;
         Log.e("TAG", "places in adapter size: " + places.size());
         this.activity = activity;
+        custom_font = Typeface.createFromAsset(activity.getAssets(), "fonts/Roboto-Light.ttf");
+        custom_font_bold = Typeface.createFromAsset(activity.getAssets(), "fonts/Roboto-Bold.ttf");
     }
 
     @Override
@@ -70,6 +75,9 @@ public class SearchResultsRecyclerViewAdapter extends RecyclerView.Adapter<Searc
             name = (TextView) itemView.findViewById(R.id.place_name);
             address = (TextView) itemView.findViewById(R.id.place_address);
             distanceToPhone = (TextView) itemView.findViewById(R.id.place_distance);
+            name.setTypeface(custom_font_bold);
+            address.setTypeface(custom_font);
+            distanceToPhone.setTypeface(custom_font);
             itemView.setOnClickListener(this);
         }
 
