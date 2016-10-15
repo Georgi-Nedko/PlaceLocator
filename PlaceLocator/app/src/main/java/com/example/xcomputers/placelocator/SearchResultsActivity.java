@@ -1,12 +1,20 @@
 package com.example.xcomputers.placelocator;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.TabLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,7 +51,7 @@ public class SearchResultsActivity extends AppCompatActivity {
     private JSONObject myobj;
     private String distance;
     private String duration;
-
+    private AlertDialog alertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,14 +88,11 @@ public class SearchResultsActivity extends AppCompatActivity {
                     float rating = Float.parseFloat(x);
                     list.add(new MyPlace((String) myobj.get("name"), (String) myobj.get("vicinity"), rating, (String) myobj.get("place_id"), placeLocation, distance, duration));
                 }
-
-
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
 
 
         Collections.sort(list, new Comparator<MyPlace>() {
@@ -108,9 +113,9 @@ public class SearchResultsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         tabLayout = (TabLayout) findViewById(R.id.tab_layout);
 
-        tabLayout.addTab(tabLayout.newTab().setText("Name"));
-        tabLayout.addTab(tabLayout.newTab().setText("Distance"));
-        tabLayout.addTab(tabLayout.newTab().setText("Rating"));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.SearchActivityTabName));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.SearchActivityTabDistance));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.SearchActivityTabRating));
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(final TabLayout.Tab tab) {
@@ -121,13 +126,14 @@ public class SearchResultsActivity extends AppCompatActivity {
                             case 0:
                                 return o1.getName().compareTo(o2.getName());
                             case 1:
-                                result = ((Double.parseDouble(o1.getDistanceToPhone().split(" ")[0]))*1000) - (Double.parseDouble(o2.getDistanceToPhone().split(" ")[0])*1000);
+                                result = ((Double.parseDouble(o1.getDistanceToPhone().split(" ")[0])) * 1000) - (Double.parseDouble(o2.getDistanceToPhone().split(" ")[0]) * 1000);
                                 Log.e("TAG", "COMPARATOR RESULT DISTANCE: " + result);
                                 return (int) result;
-
-                            case 3:
+                            case 2:
                             default:
-                                return (int) (o2.getRating() - o1.getRating());
+                                return o1.getRating() < o2.getRating() ? 1
+                                        : o1.getRating() > o2.getRating() ? -1
+                                        : 0;
 
                         }
                     }
@@ -151,6 +157,51 @@ public class SearchResultsActivity extends AppCompatActivity {
 
     }
 
+    private boolean isConnectingToInternet() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) SearchResultsActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Network[] networks = connectivityManager.getAllNetworks();
+            NetworkInfo networkInfo;
+            for (Network mNetwork : networks) {
+                networkInfo = connectivityManager.getNetworkInfo(mNetwork);
+                if (networkInfo.getState().equals(NetworkInfo.State.CONNECTED)) {
+                    return true;
+                }
+            }
+        } else {
+            if (connectivityManager != null) {
+                //noinspection deprecation
+                NetworkInfo[] info = connectivityManager.getAllNetworkInfo();
+                if (info != null) {
+                    for (NetworkInfo anInfo : info) {
+                        if (anInfo.getState() == NetworkInfo.State.CONNECTED) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private void promptUserToTurnOnWifi() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        if (!isConnectingToInternet()) {
+            builder.setTitle("Internet Services Not Active");
+            builder.setMessage("Please enable Internet Services");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    // Show location settings when the user acknowledges the alert dialog
+                    Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                    startActivity(intent);
+                }
+            });
+            alertDialog = builder.create();
+            alertDialog.setCanceledOnTouchOutside(false);
+            alertDialog.show();
+        }
+    }
+
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
@@ -171,15 +222,20 @@ public class SearchResultsActivity extends AppCompatActivity {
         return new SearchResultsRecyclerViewAdapter.onResultClickListener() {
             @Override
             public void onResultClicked(View view, int position) {
-                String placeID = list.get(position).getID();
-                Log.e("TAG", "onClick Item from list " + placeID);
-                distance = list.get(position).getDistanceToPhone();
-                duration = list.get(position).getDuration();
-                placeLocation = list.get(position).getLocation();
-                new RequestTask().execute("https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
+                if (isConnectingToInternet()) {
+                    String placeID = list.get(position).getID();
+                    Log.e("TAG", "onClick Item from list " + placeID);
+                    distance = list.get(position).getDistanceToPhone();
+                    duration = list.get(position).getDuration();
+                    placeLocation = list.get(position).getLocation();
+                    new RequestTask().execute("https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
+                } else {
+                    promptUserToTurnOnWifi();
+                }
             }
         };
     }
+
 
     class RequestTask extends AsyncTask<String, Void, String> {
 
@@ -188,7 +244,7 @@ public class SearchResultsActivity extends AppCompatActivity {
             String address = params[0];
             String response = "";
             try {
-                Log.e("ADDRESS",address);
+                Log.e("ADDRESS", address);
                 URL url = new URL(address);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");

@@ -7,68 +7,71 @@
     android:orientation="vertical"
     tools:context="com.example.xcomputers.placelocator.MainActivity">
 
-        <fragment
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/place_autocomplete_fragment"
-            android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"/>
+    <fragment
+        android:id="@+id/place_autocomplete_fragment"
+        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/button"
-            android:layout_marginTop="15dp"
-            android:text="@string/voice_recognition_button_text"
-            android:textSize="20sp"
-            android:textColor="@android:color/white"/>
-    <SeekBar
+    <Button
+        android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="50"
         android:layout_marginTop="15dp"
-        android:id="@+id/distance_seek_bar"/>
+        android:text="@string/voice_recognition_button_text"
+        android:textColor="@android:color/white"
+        android:textSize="20sp" />
+
+    <SeekBar
+        android:id="@+id/distance_seek_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:max="50" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
         android:layout_gravity="right"
-        android:gravity="right"
         android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp"
+        android:gravity="right"
         android:orientation="horizontal">
+
         <TextView
+            android:id="@+id/distance_left_TV"
             android:layout_width="0dp"
-            android:layout_weight="3"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
             android:layout_marginLeft="15dp"
+            android:layout_weight="3"
             android:text="@string/distance_slider_text"
-            android:id="@+id/distance_left_TV"/>
+            android:textSize="20sp" />
+
         <TextView
+            android:id="@+id/distance_middle_TV"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:textSize="20sp"
-            android:layout_height="wrap_content"
-            android:id="@+id/distance_middle_TV"/>
+            android:textSize="20sp" />
+
         <TextView
+            android:id="@+id/distance_right_TV"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:textSize="18sp"
-            android:text="KM"
             android:layout_height="wrap_content"
-            android:id="@+id/distance_right_TV"/>
+            android:layout_weight="1"
+            android:text="KM"
+            android:textSize="18sp" />
     </LinearLayout>
 
 
-        <android.support.v7.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/recycler_view">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        </android.support.v7.widget.RecyclerView>
-
+    </android.support.v7.widget.RecyclerView>
 
 
 </LinearLayout>

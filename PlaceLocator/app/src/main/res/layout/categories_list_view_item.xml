@@ -1,35 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.balysv.materialripple.MaterialRippleLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.balysv.materialripple.MaterialRippleLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/ripple"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:mrl_rippleColor="#FFFFFF"
     app:mrl_rippleAlpha="0.1"
-    >
+    app:mrl_rippleColor="#FFFFFF">
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <ImageView
+            android:id="@+id/category_image"
             android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:padding="3dp"
-            android:layout_height="match_parent"
-            android:id="@+id/category_image"/>
+            android:padding="3dp" />
+
         <TextView
+            android:id="@+id/category_name"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="3"
             android:layout_gravity="center"
+            android:layout_weight="3"
             android:gravity="center"
-            android:textSize="40sp"
             android:textColor="@android:color/white"
-            android:id="@+id/category_name"/>
+            android:textSize="40sp" />
 
 
-
-</LinearLayout>
+    </LinearLayout>
 </com.balysv.materialripple.MaterialRippleLayout>

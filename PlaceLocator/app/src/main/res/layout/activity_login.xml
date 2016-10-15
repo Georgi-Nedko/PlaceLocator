@@ -3,23 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/login_background"
-    android:orientation="vertical"
-    android:gravity="center">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"
-    android:gravity="center">
+    android:gravity="center"
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/welcomeTV"
-        android:textColor="@android:color/white"
-        android:text="@string/login_app_title"
-        android:textSize="40sp"
-        android:layout_gravity="center" />
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/welcomeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/login_app_title"
+            android:textColor="@android:color/white"
+            android:textSize="40sp" />
+    </LinearLayout>
 
 
     <LinearLayout
@@ -34,9 +35,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
+            android:layout_alignParentBottom="true"
             android:layout_gravity="center|bottom"
-            android:textColor="#ffffff"
-            android:layout_alignParentBottom="true" />
+            android:textColor="#ffffff" />
 
     </LinearLayout>
 

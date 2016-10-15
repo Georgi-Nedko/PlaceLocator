@@ -1,29 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+
         <TextView
+            android:id="@+id/nameOfCommentatorTV"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="51"
-            android:textStyle="bold"
+            android:text="dsadsadsasda"
             android:textColor="@android:color/white"
             android:textSize="22sp"
-            android:text="dsadsadsasda"
-            android:layout_height="wrap_content"
-            android:id="@+id/nameOfCommentatorTV"/>
+            android:textStyle="bold" />
+
         <TextView
+            android:id="@+id/comentatorRatingTV"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="4"
             android:gravity="end"
-            android:textSize="13dp"
             android:textColor="@android:color/white"
-            android:id="@+id/comentatorRatingTV"/>
+            android:textSize="13dp" />
+
         <RatingBar
             android:id="@+id/ComentatorRatingBar"
             style="?android:attr/ratingBarStyleSmall"
@@ -31,17 +35,17 @@
             android:layout_height="wrap_content"
             android:isIndicator="true"
             android:numStars="5"
-            android:stepSize="0.1"
-             />
+            android:stepSize="0.1" />
 
     </LinearLayout>
+
     <TextView
+        android:id="@+id/descriptionTV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
         android:text="dsasdadsadasdasdsadd"
         android:textColor="@android:color/white"
-        android:id="@+id/descriptionTV"/>
+        android:textSize="16sp" />
 
 
 </LinearLayout>

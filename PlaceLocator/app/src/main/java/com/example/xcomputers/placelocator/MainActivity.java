@@ -133,9 +133,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                 intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voice_recognition_dialog_text));
-                intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,1);
+                intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
                 startActivityForResult(intent, VOICE_RECOGNITION_REQUEST);
             }
@@ -146,9 +146,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             return;
         }
 
-         autocompleteFragment = (PlaceAutocompleteFragment)
+        autocompleteFragment = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-        ((EditText)autocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_input)).setTextColor(-1);
+        ((EditText) autocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_input)).setTextColor(-1);
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
@@ -177,10 +177,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onItemClick(View view, int position) {
                 showLocationProgressDialog();
-                    requestLocation();
-                    getLocation();
+                requestLocation();
+                getLocation();
 
-                if(isConnectingToInternet()) {
+                if (isConnectingToInternet()) {
                     if (lastLocation != null) {
                         executeRequest(position, list);
 
@@ -188,27 +188,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         Toast.makeText(MainActivity.this, "Please turn on your location services", Toast.LENGTH_SHORT).show();
                         isLocationOn = false;
                     }
-                }
-                else{
+                } else {
                     promptUserToTurnOnWifi();
                 }
             }
         });
 
 
-
-
         distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(progress == 0){
+                if (progress == 0) {
                     progress = 1;
                 }
                 distanceTV.setText(progress + "");
                 myRadiusString = Integer.toString(progress * 1000);
                 Log.e("TAG", "RADIUS STRING: " + myRadiusString);
                 myRadiusDouble = (double) (progress * 1000);
-                Log.e("TAG", myRadiusDouble+"");
+                Log.e("TAG", myRadiusDouble + "");
             }
 
             @Override
@@ -222,7 +219,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         });
     }
-    private void requestLocation(){
+
+    private void requestLocation() {
         showLocationProgressDialog();
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
@@ -271,9 +269,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         });
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == VOICE_RECOGNITION_REQUEST){
+        if (requestCode == VOICE_RECOGNITION_REQUEST) {
             ArrayList<String> results;
             results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             String text = results.get(0).replace("'", "");
@@ -339,8 +338,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
-
-    private void executeRequest(int position, List<Category> list){
+    private void executeRequest(int position, List<Category> list) {
         String type = list.get(position).getType();
         showRequestLoadingDialog();
         new RequestTask().execute("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longtitude + "&radius=" + myRadiusString + "&type=" + type + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
@@ -348,7 +346,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
-    private void addAllCategories(List<Category> list){
+    private void addAllCategories(List<Category> list) {
 
         list.add(new Category(getString(R.string.category_airport), R.drawable.airport, getString(R.string.request_type_airport)));
         list.add(new Category(getString(R.string.category_amusment_park), R.drawable.amusement, getString(R.string.request_type_amusement_park)));
@@ -364,10 +362,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         list.add(new Category(getString(R.string.category_camping), R.drawable.camping, getString(R.string.request_type_campgound)));
         list.add(new Category(getString(R.string.category_car_dealer), R.drawable.car_dealer, getString(R.string.request_type_car_dealer)));
         list.add(new Category(getString(R.string.category_car_rental), R.drawable.car_rental, getString(R.string.request_type_car_rental)));
-        list.add(new Category(getString(R.string.category_type_car_repair), R.drawable.car_repair,getString(R.string.request_type_car_repair)));
+        list.add(new Category(getString(R.string.category_type_car_repair), R.drawable.car_repair, getString(R.string.request_type_car_repair)));
         list.add(new Category(getString(R.string.category_casino), R.drawable.casino, getString(R.string.request_type_casino)));
         list.add(new Category(getString(R.string.category_courthouse), R.drawable.courthouse, getString(R.string.request_type_court_house)));
-        list.add(new Category(getString(R.string.category_dentist), R.drawable.dentist,getString(R.string.request_type_dentist)));
+        list.add(new Category(getString(R.string.category_dentist), R.drawable.dentist, getString(R.string.request_type_dentist)));
         list.add(new Category(getString(R.string.category_doctor), R.drawable.doctor, getString(R.string.request_type_doctor)));
         list.add(new Category(getString(R.string.category_type_fitness), R.drawable.fitness, getString(R.string.request_type_gym)));
         list.add(new Category(getString(R.string.category_gas_station), R.drawable.gas_station, getString(R.string.request_type_gas_station)));
@@ -380,6 +378,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         list.add(new Category(getString(R.string.category_train_station), R.drawable.train, getString(R.string.request_type_train_station)));
         list.add(new Category(getString(R.string.category_university), R.drawable.university, getString(R.string.request_type_university)));
     }
+
     public LatLngBounds toBounds(LatLng center, double radius) {
         LatLng southwest = SphericalUtil.computeOffset(center, radius * Math.sqrt(2.0), 225);
         LatLng northeast = SphericalUtil.computeOffset(center, radius * Math.sqrt(2.0), 45);
@@ -391,17 +390,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         getLocation();
     }
 
-    private void getLocation(){
-         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-             return;
-         }
-            lastLocation = LocationServices.FusedLocationApi.getLastLocation(client);
-            if(lastLocation != null) {
-             latitude = String.valueOf(lastLocation.getLatitude());
-             longtitude = String.valueOf(lastLocation.getLongitude());
-             autocompleteFragment.setBoundsBias(toBounds(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), myRadiusDouble));
-            }
+    private void getLocation() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
         }
+        lastLocation = LocationServices.FusedLocationApi.getLastLocation(client);
+        if (lastLocation != null) {
+            latitude = String.valueOf(lastLocation.getLatitude());
+            longtitude = String.valueOf(lastLocation.getLongitude());
+            autocompleteFragment.setBoundsBias(toBounds(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), myRadiusDouble));
+        }
+    }
+
     @Override
     public void onConnectionSuspended(int i) {
 
@@ -413,7 +413,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     class RequestTask extends AsyncTask<String, Void, String> {
-        private String getRequest(String address){
+        private String getRequest(String address) {
             StringBuilder response = new StringBuilder();
             try {
                 URL url = new URL(address);
@@ -440,7 +440,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             try {
                 json = new JSONObject(response);
                 //checking if the AsyncTask is executed with a click from the category recyclerView or from the autocomplete fragment
-                if(json.has("results")) {
+                if (json.has("results")) {
                     JSONArray array = json.getJSONArray("results");
                     Log.e("TAG", "JSON ARRAY SIZE: " + array.length());
                     for (int i = 0; i < array.length(); i++) {
@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                     }
                 }
-                if(json.has("result")){
+                if (json.has("result")) {
                     Log.e("jsonResult", json.toString());
                     address = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=" + String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()) + "&destinations=place_id:" + autocompletePlaceID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4";
                     String distanceResponse = getRequest(address);
@@ -489,8 +489,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
 
-
-            @Override
+        @Override
         protected void onPreExecute() {
             showRequestLoadingDialog();
         }
@@ -499,42 +498,49 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         protected void onPostExecute(String s) {
             JSONObject jobj = null;
             Intent intent = null;
-            try {
-                jobj = new JSONObject(s);
-                if(jobj.has("result")) {
-                    intent = new Intent(MainActivity.this, SelectedPlaceActivity.class);
-                    JSONObject resultObj = jobj.getJSONObject("result");
-                    placeLocation = new Location("");
-                    double placeLatitude = (double) resultObj.getJSONObject("geometry").getJSONObject("location").get("lat");
-                    double placeLongtitude = (double) resultObj.getJSONObject("geometry").getJSONObject("location").get("lng");
-                    placeLocation.setLatitude(placeLatitude);
-                    placeLocation.setLongitude(placeLongtitude);
-                    distance = (String) resultObj.getJSONObject("geometry").getJSONObject("distance").get("text");
-                    duration = (String) resultObj.getJSONObject("geometry").getJSONObject("duration").get("text");
-                    intent.putExtra("placeLocation", placeLocation);
-                    Log.e("SELECTED PLACE", placeLocation.toString());
-                    intent.putExtra("distance", distance);
-                    intent.putExtra("duration", duration);
+            Log.e("TAG", s);
+            if (!s.contains("ZERO_RESULTS")) {
+                try {
+                    jobj = new JSONObject(s);
+                    if (jobj.has("result")) {
+                        intent = new Intent(MainActivity.this, SelectedPlaceActivity.class);
+                        JSONObject resultObj = jobj.getJSONObject("result");
+                        placeLocation = new Location("");
+                        double placeLatitude = (double) resultObj.getJSONObject("geometry").getJSONObject("location").get("lat");
+                        double placeLongtitude = (double) resultObj.getJSONObject("geometry").getJSONObject("location").get("lng");
+                        placeLocation.setLatitude(placeLatitude);
+                        placeLocation.setLongitude(placeLongtitude);
+                        distance = (String) resultObj.getJSONObject("geometry").getJSONObject("distance").get("text");
+                        duration = (String) resultObj.getJSONObject("geometry").getJSONObject("duration").get("text");
+                        intent.putExtra("placeLocation", placeLocation);
+                        Log.e("SELECTED PLACE", placeLocation.toString());
+                        intent.putExtra("distance", distance);
+                        intent.putExtra("duration", duration);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
 
-            if(jobj.has("results")) {
-                intent = new Intent(MainActivity.this, SearchResultsActivity.class);
-            }
+                if (jobj.has("results")) {
+                    intent = new Intent(MainActivity.this, SearchResultsActivity.class);
+                }
                 intent.putExtra("json", s);
                 intent.putExtra("lastLocation", lastLocation);
                 startActivity(intent);
                 hideRequestLoadingDialog();
+            } else {
+                hideRequestLoadingDialog();
+                Toast.makeText(MainActivity.this, "No places found for your criteria", Toast.LENGTH_SHORT).show();
             }
+        }
 
 
     }
-    private void promptUserToTurnOnWifi(){
+
+    private void promptUserToTurnOnWifi() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        if(!isConnectingToInternet()){
+        if (!isConnectingToInternet()) {
             builder.setTitle("Internet Services Not Active");
             builder.setMessage("Please enable Internet Services");
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -556,37 +562,38 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         client.connect();
         super.onStart();
     }
-    public boolean isConnectingToInternet(){
-            ConnectivityManager connectivityManager = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Network[] networks = connectivityManager.getAllNetworks();
-                NetworkInfo networkInfo;
-                for (Network mNetwork : networks) {
-                    networkInfo = connectivityManager.getNetworkInfo(mNetwork);
-                    if (networkInfo.getState().equals(NetworkInfo.State.CONNECTED)) {
-                        return true;
-                    }
+
+    private boolean isConnectingToInternet() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Network[] networks = connectivityManager.getAllNetworks();
+            NetworkInfo networkInfo;
+            for (Network mNetwork : networks) {
+                networkInfo = connectivityManager.getNetworkInfo(mNetwork);
+                if (networkInfo.getState().equals(NetworkInfo.State.CONNECTED)) {
+                    return true;
                 }
-            }else {
-                if (connectivityManager != null) {
-                    //noinspection deprecation
-                    NetworkInfo[] info = connectivityManager.getAllNetworkInfo();
-                    if (info != null) {
-                        for (NetworkInfo anInfo : info) {
-                            if (anInfo.getState() == NetworkInfo.State.CONNECTED) {
-                                return true;
-                            }
+            }
+        } else {
+            if (connectivityManager != null) {
+                //noinspection deprecation
+                NetworkInfo[] info = connectivityManager.getAllNetworkInfo();
+                if (info != null) {
+                    for (NetworkInfo anInfo : info) {
+                        if (anInfo.getState() == NetworkInfo.State.CONNECTED) {
+                            return true;
                         }
                     }
                 }
             }
-            return false;
         }
+        return false;
+    }
 
 
     @Override
     protected void onStop() {
-        if(alertDialog != null)
+        if (alertDialog != null)
             alertDialog.hide();
         super.onStop();
     }

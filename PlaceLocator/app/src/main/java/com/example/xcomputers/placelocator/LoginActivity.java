@@ -37,16 +37,14 @@ import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 
-public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks{
+public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
     private static final int RC_SIGN_IN = 9001;
 
     private TextView welcomeTV;
     protected GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
     private SignInButton signInButton;
-    private boolean locationIsOn;
 
-    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +54,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         welcomeTV = (TextView) findViewById(R.id.welcomeTV);
         Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/CenturyGothic.ttf");
         welcomeTV.setTypeface(custom_font);
-
 
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -73,10 +70,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         }
 
 
-
         signInButton = (SignInButton) findViewById(R.id.google_login_button);
         signInButton.setSize(SignInButton.SIZE_WIDE);
-
 
 
         signInButton.setOnClickListener(new View.OnClickListener() {
@@ -86,8 +81,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
     }
-
-
 
 
     private void signIn() {
@@ -106,7 +99,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             handleSignInResult(result);
-            Log.e("tag",result.getStatus().getStatusCode() + "");
+            Log.e("tag", result.getStatus().getStatusCode() + "");
             changeScreen();
             finish();
         }
@@ -134,7 +127,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     public void onStart() {
 
         mGoogleApiClient.connect();
-        showProgressDialog();
+        /*showProgressDialog();
 
         OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
         if (opr.isDone()) {
@@ -156,7 +149,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 }
             });
 
-        }
+        }*/
         super.onStart();
     }
 
@@ -188,13 +181,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.e("TAG", "onConnected called");
-            //changeScreen(true);
+        //changeScreen(true);
     }
-    public void changeScreen(){
+
+    public void changeScreen() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         hideProgressDialog();
-}
+    }
 
     @Override
     public void onConnectionSuspended(int i) {

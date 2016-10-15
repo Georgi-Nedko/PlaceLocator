@@ -66,4 +66,13 @@
     <string name="distance_slider_text">Select search distance</string>
     <string name="distance_KM_text">KM</string>
     <string name="title_activity_selected_place_maps">Map</string>
+    <string name="title_activity_selected_place_maps_and_street_view_holder">
+        SelectedPlaceMapsAndStreetViewHolder
+    </string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="SearchActivityTabName">Name</string>
+    <string name="SearchActivityTabDistance">Distance</string>
+    <string name="SearchActivityTabRating">Rating</string>
+    <string name="street_view_button_text">Street View</string>
 </resources>

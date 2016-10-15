@@ -25,7 +25,8 @@ public class CategoriesRecyclerViewAdapter extends RecyclerView.Adapter<Categori
     private Activity activity;
     private onItemClickListener mItemClickListener;
     Typeface custom_font;
-    public CategoriesRecyclerViewAdapter(Activity activity, List<Category> categories){
+
+    public CategoriesRecyclerViewAdapter(Activity activity, List<Category> categories) {
         this.categories = categories;
         this.activity = activity;
         custom_font = Typeface.createFromAsset(activity.getAssets(), "fonts/CenturyGothic.ttf");
@@ -59,7 +60,7 @@ public class CategoriesRecyclerViewAdapter extends RecyclerView.Adapter<Categori
 
     }
 
-    class MyRecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class MyRecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView name;
         ImageView image;
 
@@ -76,9 +77,11 @@ public class CategoriesRecyclerViewAdapter extends RecyclerView.Adapter<Categori
             mItemClickListener.onItemClick(v, getPosition());
         }
     }
-    public interface onItemClickListener{
-         void onItemClick(View view, int position);
+
+    public interface onItemClickListener {
+        void onItemClick(View view, int position);
     }
+
     public void setOnItemClickListener(final onItemClickListener mItemClickListener) {
         this.mItemClickListener = mItemClickListener;
     }

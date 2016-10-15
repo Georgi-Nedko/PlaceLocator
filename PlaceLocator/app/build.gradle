@@ -39,6 +39,7 @@ dependencies {
     compile 'com.android.support:design:24.2.1'
     compile 'com.github.techery:properratingbar:0.0.4'
     compile 'com.balysv:material-ripple:1.0.2'
+    compile 'com.android.support:support-v13:24.2.1'
     testCompile 'junit:junit:4.12'
 }
 

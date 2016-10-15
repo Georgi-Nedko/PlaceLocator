@@ -91,14 +91,13 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_selected_place);
 
-        loadingImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(),R.drawable.image_coming_soon);
-        noImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(),R.drawable.no_photo_available);
+        loadingImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(), R.drawable.image_coming_soon);
+        noImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(), R.drawable.no_photo_available);
         //TODO make xml in scroll view
         //TODO change the horizontal scroll images
         //TODO make the recylcer view for comments
 
         //TODO change the placeid with placeSelectedID
-
 
 
         //Toast.makeText(SelectedPlaceActivity.this, placeInfo, Toast.LENGTH_SHORT).show();
@@ -110,11 +109,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         Log.e("PlACE LOCATION", String.valueOf(placeLocation.getLatitude() + "," + String.valueOf(placeLocation.getLongitude())));
 
 
-
         //  new ImageDownloaderTask(new ImageView(SelectedPlaceActivity.this)).execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=CnRtAAAATLZNl354RwP_9UKbQ_5Psy40texXePv4oAlgP4qNEkdIrkyse7rPXYGd9D_Uj1rVsQdWT4oRz4QrYAJNpFX7rzqqMlZw2h2E2y5IKMUZ7ouD_SlcHxYq1yL4KbKUv3qtWgTK0A6QbGh87GB3sscrHRIQiG2RrmU_jF4tENr9wGS_YxoUSSDrYjWmrNfeEHSGSc3FyhNLlBU&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
-
-
-
 
 
         call = (Button) findViewById(R.id.details_dial_button);
@@ -152,15 +147,12 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         MyViewFlipper.setFlipInterval(2400);
 
 
-
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         height = displaymetrics.heightPixels;
         width = displaymetrics.widthPixels;
-        MyViewFlipper.getLayoutParams().height = (int) (height/2.4);
+        MyViewFlipper.getLayoutParams().height = (int) (height / 2.4);
         MyViewFlipper.getLayoutParams().width = width;
-
-
 
 
         try {
@@ -168,19 +160,19 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             JSONObject jObjectResult = (JSONObject) jObject.get("result");
             addressTV.setText(jObjectResult.getString("formatted_address"));
             nameScrollTextView.setText(jObjectResult.getString("name"));
-            if(!jObjectResult.isNull("reviews")) {
+            if (!jObjectResult.isNull("reviews")) {
                 addAllCommentators(jObjectResult, commentators);
             }
 
             if (jObjectResult.isNull("formatted_phone_number")) {
-                 phoneTV = "no phone";
-            }else {
-                 phoneTV = (jObjectResult.getString("formatted_phone_number"));
-             }
+                phoneTV = "no phone";
+            } else {
+                phoneTV = (jObjectResult.getString("formatted_phone_number"));
+            }
             if (jObjectResult.isNull("opening_hours") || jObjectResult.getJSONObject("opening_hours").isNull("weekday_text")) {
                 openTimeTV.setText("Not given open time!");
                 Toast.makeText(SelectedPlaceActivity.this, "open time  are null", Toast.LENGTH_SHORT).show();
-            }else {
+            } else {
                 openTimeTV.setText(jObjectResult.getJSONObject("opening_hours").getString("weekday_text"));
             }
             if (jObjectResult.isNull("rating")) {
@@ -190,22 +182,22 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 //                 if (!jObjectResult.isNull("website")) {
 //                     uri = jObjectResult.getString("website");
 //                 }
-            }else {
+            } else {
                 myRB.setRating((float) jObjectResult.getDouble("rating"));
                 myRatingBarTV.setText(myRB.getRating() + "");
-             }
+            }
             if (!jObjectResult.isNull("website")) {
                 uri = jObjectResult.getString("website");
             }
-            if(!jObjectResult.isNull("photos")) {
+            if (!jObjectResult.isNull("photos")) {
                 JSONArray photos = (JSONArray) jObjectResult.get("photos");
-                for(int i = 0; i < photos.length();i++){
+                for (int i = 0; i < photos.length(); i++) {
                     Log.e("PHOTOSSSS", photos.toString());
-                    Log.e("photoreference","" + photos.getJSONObject(i).getString("photo_reference"));
-                    new ImageDownloaderTask().execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference="+ photos.getJSONObject(i).getString("photo_reference") + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
+                    Log.e("photoreference", "" + photos.getJSONObject(i).getString("photo_reference"));
+                    new ImageDownloaderTask().execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference=" + photos.getJSONObject(i).getString("photo_reference") + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
 
                 }
-            }else{
+            } else {
                 images.add(noImageBM);
                 ImageView noImage = new ImageView(SelectedPlaceActivity.this);
                 noImage.setImageBitmap(noImageBM);
@@ -470,8 +462,6 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 //            }
 
 
-
-
         } catch (JSONException e1) {
 
             e1.printStackTrace();
@@ -516,15 +506,14 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SelectedPlaceActivity.this,SelectedPlaceMapsActivity.class);
-                intent.putExtra("placeLocation",placeLocation);
-                intent.putExtra("name",nameScrollTextView.getText().toString());
+                Intent intent = new Intent(SelectedPlaceActivity.this, SelectedPlaceMapsActivity.class);
+                intent.putExtra("placeLocation", placeLocation);
+                intent.putExtra("name", nameScrollTextView.getText().toString());
                 startActivity(intent);
             }
         });
 
     }
-
 
 
     ////////////////////////////////////////////////////////////////////
@@ -534,7 +523,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            if(images.size() == 0){
+            if (images.size() == 0) {
                 images.add(loadingImageBM);
                 loadingImage = new ImageView(SelectedPlaceActivity.this);
                 loadingImage.setImageBitmap(loadingImageBM);
@@ -545,7 +534,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
         @Override
         protected Bitmap doInBackground(String... params) {
-            Log.e("IMAGESSVALQMSNIMKA",params[0]);
+            Log.e("IMAGESSVALQMSNIMKA", params[0]);
 
             return downloadBitmap(params[0]);
         }
@@ -561,23 +550,23 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 //                 ImageView imageView = imageViewReference.get();
 //                 if (imageView != null) {
 //                        if (bitmap != null) {
-                        images.add(bitmap);
-                        ImageView newImageView = new ImageView(SelectedPlaceActivity.this);
-                        MyViewFlipper.addView(newImageView);
-                        Log.e("IMAGESADD",bitmap.toString());
-                        Log.e("IMAGES1",images.size()+ "");
-                  //        } else {
-                            // Toast.makeText(SelectedPlaceActivity.this, "NO PHOTOS", Toast.LENGTH_SHORT).show();
+            images.add(bitmap);
+            ImageView newImageView = new ImageView(SelectedPlaceActivity.this);
+            MyViewFlipper.addView(newImageView);
+            Log.e("IMAGESADD", bitmap.toString());
+            Log.e("IMAGES1", images.size() + "");
+            //        } else {
+            // Toast.makeText(SelectedPlaceActivity.this, "NO PHOTOS", Toast.LENGTH_SHORT).show();
 
-                 //        }
-                //  }
+            //        }
+            //  }
 
-           //  }
+            //  }
 
-            Log.e("IMAGES",images.size()+ "");
+            Log.e("IMAGES", images.size() + "");
 
             for (int i = 0; i < images.size(); i++) {
-                Log.e("IMAGESCOUNTTT", ""+ MyViewFlipper.getChildCount());
+                Log.e("IMAGESCOUNTTT", "" + MyViewFlipper.getChildCount());
                 // ImageView newImageView = );
                 ((ImageView) MyViewFlipper.getChildAt(i)).setImageBitmap(images.get(i));
                 ((ImageView) MyViewFlipper.getChildAt(i)).setScaleType(ImageView.ScaleType.FIT_XY);
@@ -585,19 +574,16 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             }
 //            ((ImageView) MyViewFlipper.getChildAt(counterChild)).setImageBitmap(bitmap);
 //            ((ImageView) MyViewFlipper.getChildAt(counterChild)).setScaleType(ImageView.ScaleType.FIT_XY);
-           // counterChild++;
-            if(images.contains(loadingImageBM)){
+            // counterChild++;
+            if (images.contains(loadingImageBM)) {
                 images.removeFirst();
                 MyViewFlipper.removeViewAt(0);
             }
 
             MyViewFlipper.startFlipping();
-            if(images.size() <= 1) {
+            if (images.size() <= 1) {
                 MyViewFlipper.stopFlipping();
             }
-
-
-
 
 
         }
@@ -609,22 +595,22 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             URL uri = new URL(url);
             urlConnection = (HttpURLConnection) uri.openConnection();
             int statusCode = urlConnection.getResponseCode();
-            Log.e("IMAGESTATUS",statusCode +  "");
+            Log.e("IMAGESTATUS", statusCode + "");
             if (statusCode != 200) {
-                Log.e("IMAGESTATUS!=200",statusCode +  "");
+                Log.e("IMAGESTATUS!=200", statusCode + "");
                 return null;
             }
             InputStream inputStream = urlConnection.getInputStream();
             if (inputStream != null) {
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                Log.e("IMAGESBITMAP",bitmap +  "");
+                Log.e("IMAGESBITMAP", bitmap + "");
                 return bitmap;
             }
         } catch (Exception e) {
             urlConnection.disconnect();
             Log.w("IMAGESDownloader", "Error downloading image from " + url);
         } finally {
-            Log.e("IMAGESFINALY",urlConnection +  "");
+            Log.e("IMAGESFINALY", urlConnection + "");
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
@@ -635,11 +621,11 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
     void addAllCommentators(JSONObject jsonObject, ArrayList<Commentator> commentators) throws JSONException {
         JSONArray reviews = jsonObject.getJSONArray("reviews");
-        for(int i = 0; i < reviews.length();i++){
+        for (int i = 0; i < reviews.length(); i++) {
             String name = reviews.getJSONObject(i).getString("author_name");
             String description = reviews.getJSONObject(i).getString("text");
             float rating = (float) reviews.getJSONObject(i).getDouble("rating");
-            commentators.add(new Commentator(name,description,rating));
+            commentators.add(new Commentator(name, description, rating));
 
         }
     }
