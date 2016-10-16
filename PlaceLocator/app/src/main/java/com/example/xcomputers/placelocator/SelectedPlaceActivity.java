@@ -555,30 +555,25 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             MyViewFlipper.addView(newImageView);
             Log.e("IMAGESADD", bitmap.toString());
             Log.e("IMAGES1", images.size() + "");
-            //        } else {
-            // Toast.makeText(SelectedPlaceActivity.this, "NO PHOTOS", Toast.LENGTH_SHORT).show();
 
-            //        }
-            //  }
-
-            //  }
 
             Log.e("IMAGES", images.size() + "");
 
-            for (int i = 0; i < images.size(); i++) {
-                Log.e("IMAGESCOUNTTT", "" + MyViewFlipper.getChildCount());
-                // ImageView newImageView = );
-                ((ImageView) MyViewFlipper.getChildAt(i)).setImageBitmap(images.get(i));
-                ((ImageView) MyViewFlipper.getChildAt(i)).setScaleType(ImageView.ScaleType.FIT_XY);
-                //MyViewFlipper.addView(newImageView);
-            }
-//            ((ImageView) MyViewFlipper.getChildAt(counterChild)).setImageBitmap(bitmap);
-//            ((ImageView) MyViewFlipper.getChildAt(counterChild)).setScaleType(ImageView.ScaleType.FIT_XY);
-            // counterChild++;
+//            for (int i = 0; i < images.size(); i++) {
+//                Log.e("IMAGESCOUNTTT", "" + MyViewFlipper.getChildCount());
+//                // ImageView newImageView = );
+//                ((ImageView) MyViewFlipper.getChildAt(i)).setImageBitmap(images.get(i));
+//                ((ImageView) MyViewFlipper.getChildAt(i)).setScaleType(ImageView.ScaleType.FIT_XY);
+//                //MyViewFlipper.addView(newImageView);
+//            }
             if (images.contains(loadingImageBM)) {
                 images.removeFirst();
-                MyViewFlipper.removeViewAt(0);
+                MyViewFlipper.removeView(loadingImage);
             }
+            ((ImageView) MyViewFlipper.getChildAt(counterChild)).setImageBitmap(bitmap);
+            ((ImageView) MyViewFlipper.getChildAt(counterChild)).setScaleType(ImageView.ScaleType.FIT_XY);
+             counterChild++;
+
 
             MyViewFlipper.startFlipping();
             if (images.size() <= 1) {
