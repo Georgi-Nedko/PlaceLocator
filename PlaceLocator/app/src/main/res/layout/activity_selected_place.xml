@@ -6,20 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-
-
     tools:context="com.example.xcomputers.placelocator.SelectedPlaceActivity">
-
     <!-- TODO: Update blank fragment layout -->
-
 
     <ViewFlipper
         android:id="@+id/details_photo_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="240dp"
-        android:layout_alignParentTop="true">
-
-    </ViewFlipper>
+        android:layout_alignParentTop="true"></ViewFlipper>
 
     <LinearLayout
         android:id="@+id/details_social_layout"
@@ -40,7 +34,6 @@
             android:text="4.2"
             android:textSize="22sp" />
 
-
         <RatingBar
             android:id="@+id/details_rating_rb"
             style="?android:attr/ratingBarStyleIndicator"
@@ -53,10 +46,7 @@
             android:scaleX="0.75"
             android:scaleY="0.75"
             android:stepSize="0.5" />
-
-
     </LinearLayout>
-
 
     <RelativeLayout
         android:id="@+id/relativeLayout"
@@ -95,10 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/details_ETA"
             android:layout_alignParentRight="true"
-            android:layout_toRightOf="@+id/details_ETA"
-
-
-            >
+            android:layout_toRightOf="@+id/details_ETA">
 
             <TextView
                 android:id="@+id/details_open"
@@ -118,7 +105,6 @@
                 android:text="open time"
                 android:textColor="@android:color/white"
                 android:textSize="22sp" />
-
         </FrameLayout>
 
 
@@ -152,10 +138,7 @@
                 android:layout_weight="1"
                 android:background="@color/transparent"
                 android:drawableBottom="@drawable/website_visit_us"
-                android:text="visit website"
-
-
-                />
+                android:text="visit website" />
 
 
             <Button
@@ -168,7 +151,6 @@
                 android:background="@color/transparent"
                 android:drawableBottom="@drawable/call_us_mini_icon"
                 android:text="Call us!" />
-
 
             <Button
                 android:id="@+id/details_reserve_button"
@@ -192,30 +174,8 @@
             android:layout_toLeftOf="@+id/details_open"
             android:layout_toStartOf="@+id/details_open"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp">
-
-        </android.support.v7.widget.RecyclerView>
-
-
+            android:paddingRight="10dp"></android.support.v7.widget.RecyclerView>
     </RelativeLayout>
-
-
-    <!--
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/reviewsTV"
-        android:textColor="@android:color/white"
-        android:textColorHint="@android:color/white"
-        android:hint="reviews"
-        android:layout_marginRight="10dp"
-        android:layout_alignBottom="@id/details_address"
-        android:layout_toRightOf="@id/details_address"
-        android:layout_alignParentEnd="true"
-        android:gravity="start"
-        android:layout_alignParentRight="true" />
-        -->
-
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -252,6 +212,4 @@
             android:textSize="35sp" />
 
     </FrameLayout>
-
-
 </RelativeLayout>

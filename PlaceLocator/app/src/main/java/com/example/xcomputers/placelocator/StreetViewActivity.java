@@ -17,7 +17,6 @@ import android.widget.Button;
 
 public class StreetViewActivity extends AppCompatActivity {
 
-    // George St, Sydney
     private LatLng PLACE;
     private StreetViewPanoramaView mStreetViewPanoramaView;
 
@@ -34,9 +33,7 @@ public class StreetViewActivity extends AppCompatActivity {
         mStreetViewPanoramaView = new StreetViewPanoramaView(this, options);
         addContentView(mStreetViewPanoramaView,
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
         mStreetViewPanoramaView.onCreate(savedInstanceState);
-
     }
 
     @Override

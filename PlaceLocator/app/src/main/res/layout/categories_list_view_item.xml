@@ -28,7 +28,5 @@
             android:gravity="center"
             android:textColor="@android:color/white"
             android:textSize="40sp" />
-
-
     </LinearLayout>
 </com.balysv.materialripple.MaterialRippleLayout>

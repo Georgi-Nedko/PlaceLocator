@@ -87,14 +87,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private String myRadiusString;
     private double myRadiusDouble;
     public static GoogleApiClient client;
-    private GoogleSignInOptions gso;
     private Location lastLocation;
     private PlaceAutocompleteFragment autocompleteFragment;
     private static final int VOICE_RECOGNITION_REQUEST = 200;
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
     private Dialog alertDialog;
     private String autocompletePlaceID;
-    boolean isLocationOn;
+    private boolean isLocationOn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,18 +105,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         distanceKMTV = (TextView) findViewById(R.id.distance_right_TV);
         selectDistanceTV.setTypeface(custom_font);
         distanceKMTV.setTypeface(custom_font);
-
         distanceSeekBar = (SeekBar) findViewById(R.id.distance_seek_bar);
         distanceSeekBar.setProgress(1);
         myRadiusString = Integer.toString(distanceSeekBar.getProgress() * 1000);
-
         distanceTV = (TextView) findViewById(R.id.distance_middle_TV);
         distanceTV.setText(distanceSeekBar.getProgress() + "");
-
-
         voiceRecognitionButton = (Button) findViewById(R.id.button);
         voiceRecognitionButton.setTypeface(custom_font);
-
 
         if (client == null) {
             client = new GoogleApiClient.Builder(this)
@@ -145,7 +139,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-
         autocompleteFragment = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
         ((EditText) autocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_input)).setTextColor(-1);
@@ -153,14 +146,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                //TODO Intent to more info screen with place information
                 autocompletePlaceID = place.getId();
                 new RequestTask().execute("https://maps.googleapis.com/maps/api/place/details/json?placeid=" + autocompletePlaceID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
             }
 
             @Override
             public void onError(Status status) {
-                // TODO: Handle the error.
                 Log.i("TAG", "An error occurred: " + status);
             }
         });
@@ -179,7 +170,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 showLocationProgressDialog();
                 requestLocation();
                 getLocation();
-
                 if (isConnectingToInternet()) {
                     if (lastLocation != null) {
                         executeRequest(position, list);
@@ -344,7 +334,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         new RequestTask().execute("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longtitude + "&radius=" + myRadiusString + "&type=" + type + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
 
     }
-
 
     private void addAllCategories(List<Category> list) {
 
@@ -539,13 +528,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
-
     @Override
     protected void onStart() {
         promptUserToTurnOnWifi();
         client.connect();
         super.onStart();
     }
+
     private void promptUserToTurnOnWifi() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         if (!isConnectingToInternet()) {

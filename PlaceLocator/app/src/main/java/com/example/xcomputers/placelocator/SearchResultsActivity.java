@@ -43,7 +43,6 @@ public class SearchResultsActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private SearchResultsRecyclerViewAdapter adapter;
-
     private ProgressDialog mProgressDialog;
     private Location phoneLocation;
     private Location placeLocation;
@@ -58,11 +57,7 @@ public class SearchResultsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
         list = new ArrayList();
-
-
         recyclerView = (RecyclerView) findViewById(R.id.search_results_recycler_view);
-
-
         try {
             JSONObject json = new JSONObject(getIntent().getStringExtra("json"));
             JSONArray array = json.getJSONArray("results");
@@ -75,13 +70,11 @@ public class SearchResultsActivity extends AppCompatActivity {
                 double placeLongtitude = (double) myobj.getJSONObject("geometry").getJSONObject("location").get("lng");
                 placeLocation.setLatitude(placeLatitude);
                 placeLocation.setLongitude(placeLongtitude);
-
                 Log.e("TAG", getIntent().getStringExtra("json"));
                 distance = (String) myobj.getJSONObject("geometry").getJSONObject("distance").get("text");
                 duration = (String) myobj.getJSONObject("geometry").getJSONObject("duration").get("text");
                 Log.e("TAG", duration);
                 if (!myobj.has("rating")) {
-
                     list.add(new MyPlace((String) myobj.get("name"), (String) myobj.get("vicinity"), 0, (String) myobj.get("place_id"), placeLocation, distance, duration));
                 } else {
                     String x = String.valueOf(myobj.get("rating"));
@@ -89,7 +82,6 @@ public class SearchResultsActivity extends AppCompatActivity {
                     list.add(new MyPlace((String) myobj.get("name"), (String) myobj.get("vicinity"), rating, (String) myobj.get("place_id"), placeLocation, distance, duration));
                 }
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -101,7 +93,6 @@ public class SearchResultsActivity extends AppCompatActivity {
                 return o1.getName().compareTo(o2.getName());
             }
         });
-
         Log.e("TAG", "list size before setting the adapter" + list.size() + "");
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SearchResultsRecyclerViewAdapter(SearchResultsActivity.this, list);
@@ -112,10 +103,10 @@ public class SearchResultsActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-
         tabLayout.addTab(tabLayout.newTab().setText(R.string.SearchActivityTabName));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.SearchActivityTabDistance));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.SearchActivityTabRating));
+
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(final TabLayout.Tab tab) {
@@ -208,7 +199,6 @@ public class SearchResultsActivity extends AppCompatActivity {
             mProgressDialog.setMessage("Loading...");
             mProgressDialog.setIndeterminate(true);
         }
-
         mProgressDialog.show();
     }
 

@@ -20,7 +20,7 @@ public class SelectedPlaceRecyclerViewAdapter extends RecyclerView.Adapter<Selec
     private Activity activity;
     private ArrayList<Commentator> commentators;
 
-    public SelectedPlaceRecyclerViewAdapter(Activity activity,ArrayList<Commentator> commentators) {
+    public SelectedPlaceRecyclerViewAdapter(Activity activity, ArrayList<Commentator> commentators) {
         this.activity = activity;
         this.commentators = commentators;
     }
@@ -42,7 +42,7 @@ public class SelectedPlaceRecyclerViewAdapter extends RecyclerView.Adapter<Selec
         holder.nameOfAuthor.setText(commentator.getName());
         holder.description.setText(commentator.getCommentDescription());
         holder.commentRating.setRating(commentator.getRating());
-        holder.commentRatingTV.setText(""+ commentator.getRating());
+        holder.commentRatingTV.setText("" + commentator.getRating());
     }
 
 
@@ -57,6 +57,7 @@ public class SelectedPlaceRecyclerViewAdapter extends RecyclerView.Adapter<Selec
         TextView description;
         TextView commentRatingTV;
         RatingBar commentRating;
+
         public MySelectedPlaceRecyclerViewVH(View itemView) {
             super(itemView);
             nameOfAuthor = (TextView) itemView.findViewById(R.id.nameOfCommentatorTV);
@@ -65,23 +66,5 @@ public class SelectedPlaceRecyclerViewAdapter extends RecyclerView.Adapter<Selec
             commentRating = (RatingBar) itemView.findViewById(R.id.ComentatorRatingBar);
         }
     }
-
-
-//        @Override
-//        public com.example.xcomputers.placelocator.CategoriesRecyclerViewAdapter.MyRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//            switch (viewType) {
-//                case 0: return new ViewHolder0(...);
-//                case 2: return new ViewHolder2(...);
-//                ...
-//            }
-//            LayoutInflater inflater = activity.getLayoutInflater();
-//            View row = inflater.inflate(R.layout.categories_list_view_item, parent, false);
-//            //create vh
-//            com.example.xcomputers.placelocator.CategoriesRecyclerViewAdapter.MyRecyclerViewHolder vh = new com.example.xcomputers.placelocator.CategoriesRecyclerViewAdapter.MyRecyclerViewHolder(row);
-//            //return vh
-//            return vh;
-//
-//        }
-
 }
 

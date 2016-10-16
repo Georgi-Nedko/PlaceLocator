@@ -22,7 +22,7 @@ public class SearchResultsRecyclerViewAdapter extends RecyclerView.Adapter<Searc
 
     private List<MyPlace> places;
     private Activity activity;
-    onResultClickListener resultsItemClickListener;
+    private onResultClickListener resultsItemClickListener;
     private Typeface custom_font;
     private Typeface custom_font_bold;
 

@@ -13,11 +13,10 @@
         android:layout_height="match_parent"
         tools:context="com.example.xcomputers.placelocator.SelectedPlaceMapsActivity" />
 
-
     <Button
         android:id="@+id/streetViewButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/street_view_button_text"
-        android:textAllCaps="false"/>
+        android:textAllCaps="false" />
 </FrameLayout>

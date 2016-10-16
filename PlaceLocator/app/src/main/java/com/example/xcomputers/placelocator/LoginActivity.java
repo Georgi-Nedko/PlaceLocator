@@ -60,7 +60,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/CenturyGothic.ttf");
         welcomeTV.setTypeface(custom_font);
 
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -74,11 +73,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     .build();
         }
 
-
         signInButton = (SignInButton) findViewById(R.id.google_login_button);
         signInButton.setSize(SignInButton.SIZE_WIDE);
-
-
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -184,10 +180,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.e("TAG", "onConnected called");
-        //changeScreen(true);
-    }
+    public void onConnected(@Nullable Bundle bundle) {}
 
     public void changeScreen() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -196,9 +189,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-
-    }
+    public void onConnectionSuspended(int i) {}
 
     private void promptUserToTurnOnWifi() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
