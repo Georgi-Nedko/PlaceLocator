@@ -538,6 +538,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
+
+
+    @Override
+    protected void onStart() {
+        promptUserToTurnOnWifi();
+        client.connect();
+        super.onStart();
+    }
     private void promptUserToTurnOnWifi() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         if (!isConnectingToInternet()) {
@@ -554,13 +562,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             alertDialog.setCanceledOnTouchOutside(false);
             alertDialog.show();
         }
-    }
-
-    @Override
-    protected void onStart() {
-        promptUserToTurnOnWifi();
-        client.connect();
-        super.onStart();
     }
 
     private boolean isConnectingToInternet() {
