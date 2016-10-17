@@ -38,9 +38,11 @@ public class MyPlace implements Serializable{
     public float getRating() {
         return rating;
     }
+
     public String getID(){
         return this.placeID;
     }
+
     public Location getLocation(){
         return location;
     }

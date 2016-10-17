@@ -49,8 +49,6 @@ public class CategoriesRecyclerViewAdapter extends RecyclerView.Adapter<Categori
         Category category = categories.get(position);
         holder.name.setText(category.getName());
         holder.image.setImageResource(category.getImage());
-
-
     }
 
     @Override

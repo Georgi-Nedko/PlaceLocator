@@ -8,7 +8,6 @@ public class Commentator {
     String name;
     String commentDescription;
     float rating;
-    String time;
 
     public Commentator(String name, String commentDescription, float rating) {
         this.name = name;

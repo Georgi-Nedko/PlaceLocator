@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                         // Location settings are not satisfied. However, we have no way to fix the
                         // settings so we won't show the dialog.
-                        Toast.makeText(MainActivity.this, "You can't use this app unless you have your location services turned on", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.please_turn_on_location, Toast.LENGTH_SHORT).show();
                         hideLocationProgressDialog();
                         break;
                 }
@@ -260,12 +260,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == VOICE_RECOGNITION_REQUEST) {
             ArrayList<String> results;
-            results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            String text = results.get(0).replace("'", "");
-            autocompleteFragment.setText(text);
-            autocompleteFragment.getView().findViewById(com.google.android.gms.R.id.place_autocomplete_search_input).performClick();
+            String text = "";
+            if(data != null) {
+                results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                text = results.get(0).replace("'", "");
+            }
+            if(!(text == null || text.isEmpty())) {
+                autocompleteFragment.setText(text);
+                autocompleteFragment.getView().findViewById(com.google.android.gms.R.id.place_autocomplete_search_input).performClick();
+            }
         }
-        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
         switch (requestCode) {
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
@@ -289,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void showLocationProgressDialog() {
         if (LocationDialog == null) {
             LocationDialog = new ProgressDialog(this);
-            LocationDialog.setMessage("Obtaining Location...");
+            LocationDialog.setMessage(getString(R.string.obtaining_location));
             LocationDialog.setIndeterminate(true);
             LocationDialog.setCancelable(false);
             LocationDialog.setCanceledOnTouchOutside(false);
@@ -307,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void showRequestLoadingDialog() {
         if (requestLoadingDialog == null) {
             requestLoadingDialog = new ProgressDialog(this);
-            requestLoadingDialog.setMessage("Loading...");
+            requestLoadingDialog.setMessage(getString(R.string.loading_dialog));
             requestLoadingDialog.setIndeterminate(true);
             requestLoadingDialog.setCancelable(false);
             requestLoadingDialog.setCanceledOnTouchOutside(false);
@@ -404,7 +408,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.connect();
-                int status = connection.getResponseCode();
                 Scanner sc = new Scanner(connection.getInputStream());
                 while (sc.hasNextLine()) {
                     response.append(sc.nextLine());
@@ -434,7 +437,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                         JSONObject distanceJson = new JSONObject(distanceResponse);
                         JSONObject distanceRows = (JSONObject) distanceJson.getJSONArray("rows").get(0);
-                        JSONArray distanceElements = (JSONArray) distanceRows.getJSONArray("elements");
+                        JSONArray distanceElements = distanceRows.getJSONArray("elements");
                         JSONObject distanceAndDuration = distanceElements.getJSONObject(0); // distance and duration
                         JSONObject distanceObj = distanceAndDuration.getJSONObject("distance");
                         JSONObject durationObj = distanceAndDuration.getJSONObject("duration");
@@ -508,11 +511,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 hideRequestLoadingDialog();
             } else {
                 hideRequestLoadingDialog();
-                Toast.makeText(MainActivity.this, "No places found for your criteria", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, R.string.no_places_found, Toast.LENGTH_SHORT).show();
             }
         }
-
-
     }
 
 

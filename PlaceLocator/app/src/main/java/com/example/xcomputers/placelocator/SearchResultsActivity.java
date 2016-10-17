@@ -141,7 +141,7 @@ public class SearchResultsActivity extends AppCompatActivity {
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage("Loading...");
+            mProgressDialog.setMessage(getString(R.string.loading_dialog));
             mProgressDialog.setIndeterminate(true);
         }
         mProgressDialog.show();

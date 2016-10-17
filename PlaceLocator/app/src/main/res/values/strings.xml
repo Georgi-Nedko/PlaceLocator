@@ -75,4 +75,8 @@
     <string name="SearchActivityTabDistance">Distance</string>
     <string name="SearchActivityTabRating">Rating</string>
     <string name="street_view_button_text">Street View</string>
+    <string name="obtaining_location">Obtaining Location...</string>
+    <string name="no_places_found">No places found for your criteria</string>
+    <string name="loading_dialog">Loading...</string>
+    <string name="please_turn_on_location">You can\'t use this app unless you have your location services turned on</string>
 </resources>
