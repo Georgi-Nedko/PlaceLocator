@@ -1,17 +1,14 @@
 package com.example.xcomputers.placelocator;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.balysv.materialripple.MaterialRippleLayout;
 import com.example.xcomputers.placelocator.model.Category;
 
 import java.util.List;
@@ -24,7 +21,7 @@ public class CategoriesRecyclerViewAdapter extends RecyclerView.Adapter<Categori
     private List<Category> categories;
     private Activity activity;
     private onItemClickListener mItemClickListener;
-    Typeface custom_font;
+    private Typeface custom_font;
 
     public CategoriesRecyclerViewAdapter(Activity activity, List<Category> categories) {
         this.categories = categories;

@@ -16,7 +16,7 @@ import android.support.v7.app.AlertDialog;
  */
 
 public class WifiManager {
-    Activity activity;
+    private Activity activity;
     private static WifiManager myInstance = null;
     public static WifiManager getInstance(Activity activity){
         if(myInstance == null){

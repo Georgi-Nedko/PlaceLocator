@@ -3,7 +3,6 @@ package com.example.xcomputers.placelocator;
 import android.app.Activity;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +27,6 @@ public class SearchResultsRecyclerViewAdapter extends RecyclerView.Adapter<Searc
 
     public SearchResultsRecyclerViewAdapter(Activity activity, List<MyPlace> places) {
         this.places = places;
-        Log.e("TAG", "places in adapter size: " + places.size());
         this.activity = activity;
         custom_font = Typeface.createFromAsset(activity.getAssets(), "fonts/Roboto-Light.ttf");
         custom_font_bold = Typeface.createFromAsset(activity.getAssets(), "fonts/Roboto-Bold.ttf");
@@ -58,7 +56,6 @@ public class SearchResultsRecyclerViewAdapter extends RecyclerView.Adapter<Searc
 
     @Override
     public int getItemCount() {
-        Log.e("TAG", places.size() + "");
         return places.size();
     }
 

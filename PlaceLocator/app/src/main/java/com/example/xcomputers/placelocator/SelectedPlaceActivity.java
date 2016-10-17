@@ -14,7 +14,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -68,18 +67,15 @@ public class SelectedPlaceActivity extends AppCompatActivity {
     private WifiManager wifiManager;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        if (android.os.Build.VERSION.SDK_INT >= 11) {
-//            getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-//        }
         setContentView(R.layout.activity_selected_place);
         wifiManager = WifiManager.getInstance(this);
-        if(!wifiManager.isConnectingToInternet()){
+        if (!wifiManager.isConnectingToInternet()) {
             alertDialog = wifiManager.promptUserToTurnOnWifi();
         }
+
         loadingImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(), R.drawable.image_coming_soon);
         noImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(), R.drawable.no_photo_available);
 
@@ -117,6 +113,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         myViewFlipper.setOutAnimation(animationFlipOut);
         myViewFlipper.setFlipInterval(2400);
 
+
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         displayHeight = displaymetrics.heightPixels;
@@ -132,7 +129,6 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             if (!jObjectResult.isNull("reviews")) {
                 addAllCommentators(jObjectResult, commentators);
             }
-
             if (jObjectResult.isNull("formatted_phone_number")) {
                 phoneTV = "no phone";
             } else {
@@ -156,8 +152,6 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             if (!jObjectResult.isNull("photos")) {
                 JSONArray photos = (JSONArray) jObjectResult.get("photos");
                 for (int i = 0; i < photos.length(); i++) {
-                    Log.e("PHOTOSSSS", photos.toString());
-                    Log.e("photoreference", "" + photos.getJSONObject(i).getString("photo_reference"));
                     new ImageDownloaderTask().execute(("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&maxheight=400&photoreference=" + photos.getJSONObject(i).getString("photo_reference") + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4\n"));
                 }
             } else {
@@ -195,22 +189,20 @@ public class SelectedPlaceActivity extends AppCompatActivity {
                         websiteIntent.setData(Uri.parse(uri));
                         startActivity(websiteIntent);
                     }
-                }
-                else{
-                   alertDialog = wifiManager.promptUserToTurnOnWifi();
+                } else {
+                    alertDialog = wifiManager.promptUserToTurnOnWifi();
                 }
             }
         });
         map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(wifiManager.isConnectingToInternet()) {
+                if (wifiManager.isConnectingToInternet()) {
                     Intent intent = new Intent(SelectedPlaceActivity.this, SelectedPlaceMapsActivity.class);
                     intent.putExtra("placeLocation", placeLocation);
                     intent.putExtra("name", nameScrollTextView.getText().toString());
                     startActivity(intent);
-                }
-                else{
+                } else {
                     alertDialog = wifiManager.promptUserToTurnOnWifi();
                 }
             }
@@ -219,7 +211,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        if(!wifiManager.isConnectingToInternet()){
+        if (!wifiManager.isConnectingToInternet()) {
             alertDialog = wifiManager.promptUserToTurnOnWifi();
         }
         super.onStart();

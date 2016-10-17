@@ -5,9 +5,9 @@ package com.example.xcomputers.placelocator.model;
  */
 
 public class Commentator {
-    String name;
-    String commentDescription;
-    float rating;
+    private String name;
+    private String commentDescription;
+    private float rating;
 
     public Commentator(String name, String commentDescription, float rating) {
         this.name = name;
