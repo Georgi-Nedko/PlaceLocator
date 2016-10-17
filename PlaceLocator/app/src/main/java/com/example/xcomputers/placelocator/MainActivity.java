@@ -83,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
     private Dialog alertDialog;
     private String autocompletePlaceID;
+    private static final int PROGRESS_BAR_MULTIPLIER = 1000;
+    private static final int LOCATION_REQUEST_INTERVAL = 1000;
+    private static final int LOCATION_REQUEST_FASTEST_INTERVAL = 1000;
     private boolean isLocationOn;
     private WifiManager wifiManager;
 
@@ -98,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         distanceKMTV.setTypeface(custom_font);
         distanceSeekBar = (SeekBar) findViewById(R.id.distance_seek_bar);
         distanceSeekBar.setProgress(1);
-        myRadiusString = Integer.toString(distanceSeekBar.getProgress() * 1000);
+        myRadiusString = Integer.toString(distanceSeekBar.getProgress() * PROGRESS_BAR_MULTIPLIER);
         distanceTV = (TextView) findViewById(R.id.distance_middle_TV);
         distanceTV.setText(distanceSeekBar.getProgress() + "");
         voiceRecognitionButton = (Button) findViewById(R.id.button);
@@ -185,9 +188,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     progress = 1;
                 }
                 distanceTV.setText(progress + "");
-                myRadiusString = Integer.toString(progress * 1000);
+                myRadiusString = Integer.toString(progress * PROGRESS_BAR_MULTIPLIER);
                 Log.e("TAG", "RADIUS STRING: " + myRadiusString);
-                myRadiusDouble = (double) (progress * 1000);
+                myRadiusDouble = (double) (progress * PROGRESS_BAR_MULTIPLIER);
                 Log.e("TAG", myRadiusDouble + "");
             }
 
@@ -206,8 +209,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void requestLocation() {
         showLocationProgressDialog();
         LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setInterval(LOCATION_REQUEST_INTERVAL);
+        mLocationRequest.setFastestInterval(LOCATION_REQUEST_FASTEST_INTERVAL);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
