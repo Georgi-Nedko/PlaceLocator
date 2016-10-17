@@ -1,28 +1,21 @@
 package com.example.xcomputers.placelocator;
 
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 
 import com.example.xcomputers.placelocator.model.MyPlace;
+import com.example.xcomputers.placelocator.model.WifiManager;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import org.json.JSONArray;
@@ -51,17 +44,18 @@ public class SearchResultsActivity extends AppCompatActivity {
     private String distance;
     private String duration;
     private AlertDialog alertDialog;
+    private WifiManager wifiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        wifiManager = WifiManager.getInstance(this);
         setContentView(R.layout.activity_search_results);
         list = new ArrayList();
         recyclerView = (RecyclerView) findViewById(R.id.search_results_recycler_view);
         try {
             JSONObject json = new JSONObject(getIntent().getStringExtra("json"));
             JSONArray array = json.getJSONArray("results");
-            Log.e("TAG", "JSON ARRAY SIZE: " + array.length());
             for (int i = 0; i < array.length(); i++) {
                 myobj = array.getJSONObject(i);
                 phoneLocation = getIntent().getParcelableExtra("lastLocation");
@@ -70,10 +64,10 @@ public class SearchResultsActivity extends AppCompatActivity {
                 double placeLongtitude = (double) myobj.getJSONObject("geometry").getJSONObject("location").get("lng");
                 placeLocation.setLatitude(placeLatitude);
                 placeLocation.setLongitude(placeLongtitude);
-                Log.e("TAG", getIntent().getStringExtra("json"));
+
                 distance = (String) myobj.getJSONObject("geometry").getJSONObject("distance").get("text");
                 duration = (String) myobj.getJSONObject("geometry").getJSONObject("duration").get("text");
-                Log.e("TAG", duration);
+
                 if (!myobj.has("rating")) {
                     list.add(new MyPlace((String) myobj.get("name"), (String) myobj.get("vicinity"), 0, (String) myobj.get("place_id"), placeLocation, distance, duration));
                 } else {
@@ -93,7 +87,6 @@ public class SearchResultsActivity extends AppCompatActivity {
                 return o1.getName().compareTo(o2.getName());
             }
         });
-        Log.e("TAG", "list size before setting the adapter" + list.size() + "");
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SearchResultsRecyclerViewAdapter(SearchResultsActivity.this, list);
         recyclerView.setAdapter(adapter);
@@ -118,21 +111,17 @@ public class SearchResultsActivity extends AppCompatActivity {
                                 return o1.getName().compareTo(o2.getName());
                             case 1:
                                 result = ((Double.parseDouble(o1.getDistanceToPhone().split(" ")[0])) * 1000) - (Double.parseDouble(o2.getDistanceToPhone().split(" ")[0]) * 1000);
-                                Log.e("TAG", "COMPARATOR RESULT DISTANCE: " + result);
                                 return (int) result;
                             case 2:
                             default:
                                 return o1.getRating() < o2.getRating() ? 1
                                         : o1.getRating() > o2.getRating() ? -1
                                         : 0;
-
                         }
                     }
 
                 });
-                adapter = new SearchResultsRecyclerViewAdapter(SearchResultsActivity.this, list);
-                adapter.setOnResultClickListener(createClickListener());
-                recyclerView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -148,50 +137,6 @@ public class SearchResultsActivity extends AppCompatActivity {
 
     }
 
-    private boolean isConnectingToInternet() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) SearchResultsActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Network[] networks = connectivityManager.getAllNetworks();
-            NetworkInfo networkInfo;
-            for (Network mNetwork : networks) {
-                networkInfo = connectivityManager.getNetworkInfo(mNetwork);
-                if (networkInfo.getState().equals(NetworkInfo.State.CONNECTED)) {
-                    return true;
-                }
-            }
-        } else {
-            if (connectivityManager != null) {
-                //noinspection deprecation
-                NetworkInfo[] info = connectivityManager.getAllNetworkInfo();
-                if (info != null) {
-                    for (NetworkInfo anInfo : info) {
-                        if (anInfo.getState() == NetworkInfo.State.CONNECTED) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private void promptUserToTurnOnWifi() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        if (!isConnectingToInternet()) {
-            builder.setTitle("Internet Services Not Active");
-            builder.setMessage("Please enable Internet Services");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    // Show location settings when the user acknowledges the alert dialog
-                    Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                    startActivity(intent);
-                }
-            });
-            alertDialog = builder.create();
-            alertDialog.setCanceledOnTouchOutside(false);
-            alertDialog.show();
-        }
-    }
 
     private void showProgressDialog() {
         if (mProgressDialog == null) {
@@ -212,15 +157,16 @@ public class SearchResultsActivity extends AppCompatActivity {
         return new SearchResultsRecyclerViewAdapter.onResultClickListener() {
             @Override
             public void onResultClicked(View view, int position) {
-                if (isConnectingToInternet()) {
+                if (wifiManager.isConnectingToInternet()) {
                     String placeID = list.get(position).getID();
-                    Log.e("TAG", "onClick Item from list " + placeID);
                     distance = list.get(position).getDistanceToPhone();
                     duration = list.get(position).getDuration();
                     placeLocation = list.get(position).getLocation();
                     new RequestTask().execute("https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4");
                 } else {
-                    promptUserToTurnOnWifi();
+                    if(!wifiManager.isConnectingToInternet()){
+                        alertDialog = wifiManager.promptUserToTurnOnWifi();
+                    }
                 }
             }
         };
@@ -234,7 +180,6 @@ public class SearchResultsActivity extends AppCompatActivity {
             String address = params[0];
             String response = "";
             try {
-                Log.e("ADDRESS", address);
                 URL url = new URL(address);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
@@ -242,11 +187,9 @@ public class SearchResultsActivity extends AppCompatActivity {
                 int status = connection.getResponseCode();
                 Scanner sc = new Scanner(connection.getInputStream());
                 while (sc.hasNextLine()) {
-
                     response += sc.nextLine();
                 }
             } catch (IOException e) {
-
                 e.printStackTrace();
             }
             return response;

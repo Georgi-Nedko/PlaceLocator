@@ -3,26 +3,18 @@ package com.example.xcomputers.placelocator;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,7 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.xcomputers.placelocator.model.Category;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.example.xcomputers.placelocator.model.WifiManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -61,8 +53,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,13 +84,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Dialog alertDialog;
     private String autocompletePlaceID;
     private boolean isLocationOn;
+    private WifiManager wifiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf");
-
+        wifiManager = WifiManager.getInstance(this);
         selectDistanceTV = (TextView) findViewById(R.id.distance_left_TV);
         distanceKMTV = (TextView) findViewById(R.id.distance_right_TV);
         selectDistanceTV.setTypeface(custom_font);
@@ -170,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 showLocationProgressDialog();
                 requestLocation();
                 getLocation();
-                if (isConnectingToInternet()) {
+                if (wifiManager.isConnectingToInternet()) {
                     if (lastLocation != null) {
                         executeRequest(position, list);
 
@@ -179,7 +170,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         isLocationOn = false;
                     }
                 } else {
-                    promptUserToTurnOnWifi();
+                    if(!wifiManager.isConnectingToInternet()){
+                        alertDialog = wifiManager.promptUserToTurnOnWifi();
+                    }
                 }
             }
         });
@@ -280,7 +273,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         break;
                     case Activity.RESULT_CANCELED:
                         hideLocationProgressDialog();
-
                         break;
                     default:
                         hideLocationProgressDialog();
@@ -431,14 +423,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 //checking if the AsyncTask is executed with a click from the category recyclerView or from the autocomplete fragment
                 if (json.has("results")) {
                     JSONArray array = json.getJSONArray("results");
-                    Log.e("TAG", "JSON ARRAY SIZE: " + array.length());
                     for (int i = 0; i < array.length(); i++) {
                         JSONObject myobj = array.getJSONObject(i);
                         String placeID = (String) myobj.get("place_id");
                         address = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=" + String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()) + "&destinations=place_id:" + placeID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4";
                         String distanceResponse = getRequest(address);
 
-                        Log.e("DISTACE RESPONCE", distanceResponse);
                         JSONObject distanceJson = new JSONObject(distanceResponse);
                         JSONObject distanceRows = (JSONObject) distanceJson.getJSONArray("rows").get(0);
                         JSONArray distanceElements = (JSONArray) distanceRows.getJSONArray("elements");
@@ -453,17 +443,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     }
                 }
                 if (json.has("result")) {
-                    Log.e("jsonResult", json.toString());
                     address = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=" + String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()) + "&destinations=place_id:" + autocompletePlaceID + "&key=AIzaSyDWeC1Uu7iVM2HyHi-dc6Xvde6b45vSFl4";
                     String distanceResponse = getRequest(address);
                     JSONObject distanceJson = new JSONObject(distanceResponse);
-                    Log.e("autocomplete distance", distanceResponse);
                     JSONObject distanceRows = (JSONObject) distanceJson.getJSONArray("rows").get(0);
                     JSONArray distanceElements = distanceRows.getJSONArray("elements");
                     JSONObject distanceAndDuration = distanceElements.getJSONObject(0); // distance and duration
                     JSONObject distanceObj = distanceAndDuration.getJSONObject("distance");
                     JSONObject durationObj = distanceAndDuration.getJSONObject("duration");
-
 
                     JSONObject geometry = json.getJSONObject("result").getJSONObject("geometry");
                     geometry.put("distance", distanceObj);
@@ -487,7 +474,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         protected void onPostExecute(String s) {
             JSONObject jobj = null;
             Intent intent = null;
-            Log.e("TAG", s);
             if (!s.contains("ZERO_RESULTS")) {
                 try {
                     jobj = new JSONObject(s);
@@ -502,7 +488,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         distance = (String) resultObj.getJSONObject("geometry").getJSONObject("distance").get("text");
                         duration = (String) resultObj.getJSONObject("geometry").getJSONObject("duration").get("text");
                         intent.putExtra("placeLocation", placeLocation);
-                        Log.e("SELECTED PLACE", placeLocation.toString());
                         intent.putExtra("distance", distance);
                         intent.putExtra("duration", duration);
                     }
@@ -530,54 +515,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     protected void onStart() {
-        promptUserToTurnOnWifi();
+        if(!wifiManager.isConnectingToInternet()){
+            alertDialog = wifiManager.promptUserToTurnOnWifi();
+        }
         client.connect();
         super.onStart();
-    }
-
-    private void promptUserToTurnOnWifi() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        if (!isConnectingToInternet()) {
-            builder.setTitle("Internet Services Not Active");
-            builder.setMessage("Please enable Internet Services");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    // Show location settings when the user acknowledges the alert dialog
-                    Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                    startActivity(intent);
-                }
-            });
-            alertDialog = builder.create();
-            alertDialog.setCanceledOnTouchOutside(false);
-            alertDialog.show();
-        }
-    }
-
-    private boolean isConnectingToInternet() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Network[] networks = connectivityManager.getAllNetworks();
-            NetworkInfo networkInfo;
-            for (Network mNetwork : networks) {
-                networkInfo = connectivityManager.getNetworkInfo(mNetwork);
-                if (networkInfo.getState().equals(NetworkInfo.State.CONNECTED)) {
-                    return true;
-                }
-            }
-        } else {
-            if (connectivityManager != null) {
-                //noinspection deprecation
-                NetworkInfo[] info = connectivityManager.getAllNetworkInfo();
-                if (info != null) {
-                    for (NetworkInfo anInfo : info) {
-                        if (anInfo.getState() == NetworkInfo.State.CONNECTED) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
     }
 
 

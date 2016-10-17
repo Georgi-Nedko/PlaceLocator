@@ -9,13 +9,13 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -26,6 +26,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.example.xcomputers.placelocator.model.Commentator;
+import com.example.xcomputers.placelocator.model.WifiManager;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import org.json.JSONArray;
@@ -63,33 +64,28 @@ public class SelectedPlaceActivity extends AppCompatActivity {
     private ArrayList<Commentator> commentators;
     private int displayHeight;
     private int displayWidth;
+    private AlertDialog alertDialog;
+    private WifiManager wifiManager;
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (android.os.Build.VERSION.SDK_INT >= 11) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-        }
+//        if (android.os.Build.VERSION.SDK_INT >= 11) {
+//            getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+//        }
         setContentView(R.layout.activity_selected_place);
-
+        wifiManager = WifiManager.getInstance(this);
+        if(!wifiManager.isConnectingToInternet()){
+            alertDialog = wifiManager.promptUserToTurnOnWifi();
+        }
         loadingImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(), R.drawable.image_coming_soon);
         noImageBM = BitmapFactory.decodeResource(SelectedPlaceActivity.this.getResources(), R.drawable.no_photo_available);
-        //TODO make xml in scroll view
-        //TODO change the horizontal scroll images
-        //TODO make the recylcer view for comments
-
-        //TODO change the placeid with placeSelectedID
-
 
         String placeSelectedJSON = getIntent().getStringExtra("json");
-        Log.e("JSON", placeSelectedJSON);
         lastLocation = getIntent().getParcelableExtra("lastLocation");
-        Log.e("LAST LOCATION", String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()));
         placeLocation = getIntent().getParcelableExtra("placeLocation");
-        Log.e("PlACE LOCATION", String.valueOf(placeLocation.getLatitude() + "," + String.valueOf(placeLocation.getLongitude())));
-
 
         call = (Button) findViewById(R.id.details_dial_button);
         map = (Button) findViewById(R.id.details_reserve_button);
@@ -191,24 +187,42 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         website.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (uri == null) {
-                    Toast.makeText(SelectedPlaceActivity.this, "This place does not have a website!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Intent websiteIntent = new Intent(Intent.ACTION_VIEW);
-                    websiteIntent.setData(Uri.parse(uri));
-                    startActivity(websiteIntent);
+                if (wifiManager.isConnectingToInternet()) {
+                    if (uri == null) {
+                        Toast.makeText(SelectedPlaceActivity.this, "This place does not have a website!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Intent websiteIntent = new Intent(Intent.ACTION_VIEW);
+                        websiteIntent.setData(Uri.parse(uri));
+                        startActivity(websiteIntent);
+                    }
+                }
+                else{
+                   alertDialog = wifiManager.promptUserToTurnOnWifi();
                 }
             }
         });
         map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SelectedPlaceActivity.this, SelectedPlaceMapsActivity.class);
-                intent.putExtra("placeLocation", placeLocation);
-                intent.putExtra("name", nameScrollTextView.getText().toString());
-                startActivity(intent);
+                if(wifiManager.isConnectingToInternet()) {
+                    Intent intent = new Intent(SelectedPlaceActivity.this, SelectedPlaceMapsActivity.class);
+                    intent.putExtra("placeLocation", placeLocation);
+                    intent.putExtra("name", nameScrollTextView.getText().toString());
+                    startActivity(intent);
+                }
+                else{
+                    alertDialog = wifiManager.promptUserToTurnOnWifi();
+                }
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        if(!wifiManager.isConnectingToInternet()){
+            alertDialog = wifiManager.promptUserToTurnOnWifi();
+        }
+        super.onStart();
     }
 
     class ImageDownloaderTask extends AsyncTask<String, Void, Bitmap> {
@@ -226,8 +240,6 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
         @Override
         protected Bitmap doInBackground(String... params) {
-            Log.e("IMAGESSVALQMSNIMKA", params[0]);
-
             return downloadBitmap(params[0]);
         }
 
@@ -244,11 +256,6 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             images.add(bitmap);
             ImageView newImageView = new ImageView(SelectedPlaceActivity.this);
             myViewFlipper.addView(newImageView);
-            Log.e("IMAGESADD", bitmap.toString());
-            Log.e("IMAGES1", images.size() + "");
-            Log.e("IMAGES", images.size() + "");
-
-
 
             ((ImageView) myViewFlipper.getChildAt(counterChild)).setImageBitmap(bitmap);
             ((ImageView) myViewFlipper.getChildAt(counterChild)).setScaleType(ImageView.ScaleType.FIT_XY);
@@ -266,22 +273,17 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             URL uri = new URL(url);
             urlConnection = (HttpURLConnection) uri.openConnection();
             int statusCode = urlConnection.getResponseCode();
-            Log.e("IMAGESTATUS", statusCode + "");
             if (statusCode != 200) {
-                Log.e("IMAGESTATUS!=200", statusCode + "");
                 return null;
             }
             InputStream inputStream = urlConnection.getInputStream();
             if (inputStream != null) {
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                Log.e("IMAGESBITMAP", bitmap + "");
                 return bitmap;
             }
         } catch (Exception e) {
             urlConnection.disconnect();
-            Log.w("IMAGESDownloader", "Error downloading image from " + url);
         } finally {
-            Log.e("IMAGESFINALY", urlConnection + "");
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
