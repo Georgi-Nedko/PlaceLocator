@@ -19,9 +19,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,8 +37,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
-
-import io.techery.properratingbar.ProperRatingBar;
 
 public class SelectedPlaceActivity extends AppCompatActivity {
 
@@ -60,13 +56,14 @@ public class SelectedPlaceActivity extends AppCompatActivity {
     private String uri;
     private LinkedList<Bitmap> images;
     private int counterChild = 0;
-    private ViewFlipper MyViewFlipper;
+    private ViewFlipper myViewFlipper;
     private Bitmap loadingImageBM;
     private Bitmap noImageBM;
     private ImageView loadingImage;
     private ArrayList<Commentator> commentators;
-    private int height;
-    private int width;
+    private int displayHeight;
+    private int displayWidth;
+
 
 
     @Override
@@ -85,12 +82,14 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
         //TODO change the placeid with placeSelectedID
 
+
         String placeSelectedJSON = getIntent().getStringExtra("json");
         Log.e("JSON", placeSelectedJSON);
         lastLocation = getIntent().getParcelableExtra("lastLocation");
         Log.e("LAST LOCATION", String.valueOf(lastLocation.getLatitude()) + "," + String.valueOf(lastLocation.getLongitude()));
         placeLocation = getIntent().getParcelableExtra("placeLocation");
         Log.e("PlACE LOCATION", String.valueOf(placeLocation.getLatitude() + "," + String.valueOf(placeLocation.getLongitude())));
+
 
         call = (Button) findViewById(R.id.details_dial_button);
         map = (Button) findViewById(R.id.details_reserve_button);
@@ -102,7 +101,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
         openTimeTV = (TextView) findViewById(R.id.details_open);
         distanceTV = (TextView) findViewById(R.id.details_ETA);
         images = new LinkedList<>();
-        MyViewFlipper = (ViewFlipper) findViewById(R.id.details_photo_scroll_view);
+        myViewFlipper = (ViewFlipper) findViewById(R.id.details_photo_scroll_view);
 
         commentsRecyclerView = (RecyclerView) findViewById(R.id.comments_RV);
         commentsRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this).color(Color.WHITE).build());
@@ -118,16 +117,16 @@ public class SelectedPlaceActivity extends AppCompatActivity {
 
         Animation animationFlipIn = AnimationUtils.loadAnimation(SelectedPlaceActivity.this, R.anim.flipin);
         Animation animationFlipOut = AnimationUtils.loadAnimation(SelectedPlaceActivity.this, R.anim.flipout);
-        MyViewFlipper.setInAnimation(animationFlipIn);
-        MyViewFlipper.setOutAnimation(animationFlipOut);
-        MyViewFlipper.setFlipInterval(2400);
+        myViewFlipper.setInAnimation(animationFlipIn);
+        myViewFlipper.setOutAnimation(animationFlipOut);
+        myViewFlipper.setFlipInterval(2400);
 
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        height = displaymetrics.heightPixels;
-        width = displaymetrics.widthPixels;
-        MyViewFlipper.getLayoutParams().height = (int) (height / 2.4);
-        MyViewFlipper.getLayoutParams().width = width;
+        displayHeight = displaymetrics.heightPixels;
+        displayWidth = displaymetrics.widthPixels;
+        myViewFlipper.getLayoutParams().height = (int) (displayHeight / 2.4);
+        myViewFlipper.getLayoutParams().width = displayWidth;
 
         try {
             JSONObject jObject = new JSONObject(placeSelectedJSON);
@@ -170,7 +169,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
                 ImageView noImage = new ImageView(SelectedPlaceActivity.this);
                 noImage.setImageBitmap(noImageBM);
                 noImage.setScaleType(ImageView.ScaleType.FIT_XY);
-                MyViewFlipper.addView(noImage);
+                myViewFlipper.addView(noImage);
             }
         } catch (JSONException e1) {
             e1.printStackTrace();
@@ -193,7 +192,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (uri == null) {
-                    Toast.makeText(SelectedPlaceActivity.this, "This place does not have a website", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SelectedPlaceActivity.this, "This place does not have a website!", Toast.LENGTH_SHORT).show();
                 } else {
                     Intent websiteIntent = new Intent(Intent.ACTION_VIEW);
                     websiteIntent.setData(Uri.parse(uri));
@@ -221,7 +220,7 @@ public class SelectedPlaceActivity extends AppCompatActivity {
                 loadingImage = new ImageView(SelectedPlaceActivity.this);
                 loadingImage.setImageBitmap(loadingImageBM);
                 loadingImage.setScaleType(ImageView.ScaleType.FIT_XY);
-                MyViewFlipper.addView(loadingImage);
+                myViewFlipper.addView(loadingImage);
             }
         }
 
@@ -238,23 +237,25 @@ public class SelectedPlaceActivity extends AppCompatActivity {
             if (isCancelled()) {
                 bitmap = null;
             }
+            if (images.contains(loadingImageBM)) {
+                images.removeFirst();
+                myViewFlipper.removeView(loadingImage);
+            }
             images.add(bitmap);
             ImageView newImageView = new ImageView(SelectedPlaceActivity.this);
-            MyViewFlipper.addView(newImageView);
+            myViewFlipper.addView(newImageView);
             Log.e("IMAGESADD", bitmap.toString());
             Log.e("IMAGES1", images.size() + "");
             Log.e("IMAGES", images.size() + "");
 
-            if (images.contains(loadingImageBM)) {
-                images.removeFirst();
-                MyViewFlipper.removeView(loadingImage);
-            }
-            ((ImageView) MyViewFlipper.getChildAt(counterChild)).setImageBitmap(bitmap);
-            ((ImageView) MyViewFlipper.getChildAt(counterChild)).setScaleType(ImageView.ScaleType.FIT_XY);
+
+
+            ((ImageView) myViewFlipper.getChildAt(counterChild)).setImageBitmap(bitmap);
+            ((ImageView) myViewFlipper.getChildAt(counterChild)).setScaleType(ImageView.ScaleType.FIT_XY);
             counterChild++;
-            MyViewFlipper.startFlipping();
+            myViewFlipper.startFlipping();
             if (images.size() <= 1) {
-                MyViewFlipper.stopFlipping();
+                myViewFlipper.stopFlipping();
             }
         }
     }
